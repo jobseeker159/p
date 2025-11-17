@@ -1,0 +1,5091 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz Template - Single & Multiple Choice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .score-summary {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-number {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .question-item.answered {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .question-item.incorrect {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .question-status {
+            font-size: 1.2em;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .options-container {
+            margin-bottom: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            margin: 8px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-item.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .option-item.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-item.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option-item.user-selected {
+            border-color: #007bff;
+            background: #cce7ff;
+            font-weight: bold;
+        }
+
+        .option-item.user-incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+            text-decoration: line-through;
+        }
+
+        .answer-indicator {
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .correct-indicator {
+            color: #28a745;
+        }
+
+        .incorrect-indicator {
+            color: #dc3545;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .explanation h4 {
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            font-size: 1em;
+        }
+
+        .explanation p {
+            color: #533f04;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .action-buttons {
+            background: white;
+            padding: 20px 40px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .icon {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>� Quiz Template</h1>
+            <p>Template hỗ trợ cả câu hỏi single choice và multiple choice</p>
+            <div class="score-summary">
+                <div class="score-item">
+                    <div class="score-number" id="totalQuestions">0</div>
+                    <div class="score-label">Tổng câu</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-number" id="answeredCount">0</div>
+                    <div class="score-label">Đã trả lời</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-number" id="correctCount">0</div>
+                    <div class="score-label">Đúng</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-number" id="scorePercentage">0%</div>
+                    <div class="score-label">Điểm số</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+            <!-- 
+            Hướng dẫn sử dụng template:
+            1. Thay đổi tiêu đề và mô tả trong phần quiz-header
+            2. Cập nhật mảng questions với câu hỏi của bạn
+            3. Sử dụng type: "single" cho câu hỏi một đáp án
+            4. Sử dụng type: "multiple" cho câu hỏi nhiều đáp án
+            5. Với single choice: correct = index số (vd: 0, 1, 2)
+            6. Với multiple choice: correct = mảng index (vd: [0, 2, 3])
+            
+            Ví dụ câu hỏi single choice:
+            {
+                id: 1,
+                question: "Câu hỏi của bạn?",
+                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+                correct: 0, // Đáp án đúng là A (index 0)
+                type: "single",
+                explanation: "Giải thích tại sao đáp án A đúng"
+            }
+            
+            Ví dụ câu hỏi multiple choice:
+            {
+                id: 2,
+                question: "Chọn tất cả đáp án đúng:",
+                options: ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
+                correct: [0, 2], // Đáp án đúng là A và C
+                type: "multiple",
+                explanation: "Giải thích tại sao A và C đúng"
+            }
+            -->
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="resetQuiz()">
+                🔄 Làm lại toàn bộ
+            </button>
+            <div>
+                <button class="btn btn-primary" onclick="showAllAnswers()">
+                    👁️ Hiện tất cả đáp án
+                </button>
+                <button class="btn btn-success" onclick="checkAllAnswers()">
+                    ✅ Kiểm tra kết quả
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+        ===================================================================
+        📝 QUIZ TEMPLATE - HƯỚNG DẪN SỬ DỤNG
+        ===================================================================
+        
+        🎯 TÍNH NĂNG:
+        ✅ Hỗ trợ câu hỏi Single Choice (chọn 1 đáp án)
+        ✅ Hỗ trợ câu hỏi Multiple Choice (chọn nhiều đáp án)
+        ✅ Tự động khóa câu hỏi sau khi trả lời
+        ✅ Hiển thị giải thích ngay lập tức
+        ✅ Theo dõi điểm số realtime
+        ✅ Responsive design cho mọi thiết bị
+        
+        🔧 CÁCH SỬ DỤNG:
+        1. Thay đổi tiêu đề và mô tả trong phần quiz-header
+        2. Thay thế mảng questions bên dưới bằng câu hỏi của bạn
+        3. Sử dụng type: "single" cho câu hỏi một đáp án
+        4. Sử dụng type: "multiple" cho câu hỏi nhiều đáp án
+        
+        📋 CẤU TRÚC CÂU HỎI:
+        - id: Số thứ tự câu hỏi (duy nhất)
+        - question: Nội dung câu hỏi
+        - options: Mảng các đáp án (tối đa 5 đáp án)
+        - correct: Đáp án đúng (số cho single, mảng cho multiple)
+        - type: "single" hoặc "multiple"
+        - explanation: Giải thích chi tiết
+        
+        💡 LƯU Ý:
+        - Index đáp án bắt đầu từ 0 (A=0, B=1, C=2, D=3, E=4)
+        - Multiple choice cần chọn đủ số đáp án đúng mới được khóa
+        - Giải thích hiển thị ngay sau khi hoàn thành câu hỏi
+        ===================================================================
+        */
+        
+        const questions = [
+            // ========== CÂU 1 ==========
+{
+    id: 1,
+    question: "What is the meaning of platform-independent?",
+    options: [
+        "write once, run anywhere",
+        "not easy to execute on any system after compilation.",
+        "the execution of the program is restricted by the type of OS environment provided.",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Platform-independent means the ability to write code once and run it on any system with a compatible runtime environment, which is a key feature of Java."
+},
+
+// ========== CÂU 2 ==========
+{
+    id: 2,
+    question: "What is the purpose of a Java Virtual Machine(JVM)?",
+    options: [
+        "It is used to interpret and execute Java bytecode",
+        "It is used to write the bytecode into the .class file",
+        "It is used to verify and improve performance the of Java programs",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The JVM's primary role is to interpret and execute Java bytecode, making Java programs platform-independent."
+},
+
+// ========== CÂU 3 ==========
+{
+    id: 3,
+    question: "Which of the following are components of the Java platform?",
+    options: [
+        "JVM(Java Virtual Machine), the java application programming interface (API)",
+        "JVM(Java Virtual Machine), Java Run-time Environment",
+        "JVM(Java Virtual Machine), java compiler",
+        "Java compiler, java"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The Java platform consists of the JVM and the Java API, which together provide the environment for running Java applications."
+},
+
+// ========== CÂU 4 ==========
+{
+    id: 4,
+    question: "What is the role of the Garbage Collection?",
+    options: [
+        "It frees heap memory by destroying unreachable objects.",
+        "It deletes all the Java files available on the memory.",
+        "It loads a Java program into memory.",
+        "It checks the output of any Java program and deletes anything that does not make sense at all."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Garbage Collection automatically reclaims memory by destroying objects that are no longer reachable, preventing memory leaks."
+},
+
+// ========== CÂU 5 ==========
+{
+    id: 5,
+    question: "Which is a valid keyword in Java?",
+    options: [
+        "interface",
+        "include",
+        "Float",
+        "Integer"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "'interface' is a Java keyword used to declare an interface. 'Float' and 'Integer' are class names, not keywords."
+},
+
+// ========== CÂU 6 ==========
+{
+    id: 6,
+    question: "What is the file extension of Java source code?",
+    options: [
+        ".java",
+        ".class",
+        ".jar",
+        ".rar"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java source code files use the .java extension before being compiled into .class files."
+},
+
+// ========== CÂU 7 ==========
+{
+    id: 7,
+    question: "Choose the correct statement about the 'instanceof' operator.",
+    options: [
+        "It can be used to test if an object is of a specified type.",
+        "The instanceof is also known as a string comparison operator.",
+        "The instanceof operator is used to check the validity of object variables",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The instanceof operator is used specifically for type checking of objects at runtime."
+},
+
+// ========== CÂU 8 ==========
+{
+    id: 8,
+    question: "Which of the following is the entry point of the Java program?",
+    options: [
+        "main method",
+        "class method",
+        "instance method",
+        "static method"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The main method with signature 'public static void main(String[] args)' is the standard entry point for Java applications."
+},
+
+// ========== CÂU 9 ==========
+{
+    id: 9,
+    question: "What is the default value of the data type double in Java?",
+    options: [
+        "0.0",
+        "0",
+        "Null",
+        "1.0",
+        "-1.0",
+        "NaN"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The default value for double (and all floating-point types) in Java is 0.0."
+},
+
+// ========== CÂU 10 ==========
+{
+    id: 10,
+    question: `What is the output of the following code snippet?
+<pre><code>public static void main(String[] args) {
+    int[][] arr = {{1,2,3}, {4,5,6,6}, {6,7,8}};
+    int[] copy = {9,10,11,12};
+    arr[2] = copy;
+    System.out.println(arr[2][2]);
+}</code></pre>`,
+    options: [
+        "11",
+        "8",
+        "6",
+        "9"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "After assigning 'copy' to arr[2], arr[2][2] accesses the third element of the copy array, which is 11."
+},
+
+// ========== CÂU 11 ==========
+{
+    id: 11,
+    question: `What is the output of the code snippet?
+<pre><code>public class Test {
+    public static void main(String[] args) {
+        int x = -1;
+        String y = x + 3;
+        System.out.format("%d %s", x, y);
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "-1 -13",
+        "-14",
+        "-12"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Cannot convert int to String implicitly in assignment. Requires explicit conversion like String.valueOf(x+3)."
+},
+
+// ========== CÂU 12 ==========
+{
+    id: 12,
+    question: `What is the output of the code snippet?
+<pre><code>public class Test {
+    public static void main(String[] args) {
+        int[] a = new int[5];
+        for(int i : a){
+            i = 1;
+        }
+        System.out.println(a[1]);
+    }
+}</code></pre>`,
+    options: [
+        "0",
+        "1",
+        "null",
+        "[l@15db9742]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The enhanced for loop creates a temporary variable i, so modifying i doesn't affect the original array elements."
+},
+
+// ========== CÂU 13 ==========
+{
+    id: 13,
+    question: `What is the output of the following code snippet?
+<pre><code>public static void main(String[] args) {
+    int yob = 1999;
+    if (yob)
+        System.out.print("Lower");
+    else System.out.print("Upper");
+    System.out.println("2000");
+}</code></pre>`,
+    options: [
+        "Syntax error",
+        "Upper",
+        "Lower 2000",
+        "Lower"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java requires boolean expressions in if conditions. Using int (yob) causes a syntax error."
+},
+
+// ========== CÂU 14 ==========
+{
+    id: 14,
+    question: "What is a checked exception in Java?",
+    options: [
+        "Checked exceptions are the ones that are checked during compilation time",
+        "Checked exceptions are the ones that are checked during the execution time",
+        "Checked exceptions are syntax errors",
+        "Checked exceptions are runtime errors"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Checked exceptions must be either caught or declared in the method signature, and are verified at compile time."
+},
+
+// ========== CÂU 15 ==========
+{
+    id: 15,
+    question: "Which of the following modifiers is used to hide information of a class from the classes outside?",
+    options: [
+        "private",
+        "public",
+        "protected",
+        "default"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The private modifier restricts access to within the same class only, providing the highest level of encapsulation."
+},
+
+// ========== CÂU 16 ==========
+{
+    id: 16,
+    question: "In Java, if a class does not explicitly define a constructor, what type of constructor is automatically provided?",
+    options: [
+        "Parameterized constructor",
+        "Default constructor",
+        "Private constructor",
+        "Static constructor",
+        "Overloaded constructor",
+        "Abstract constructor"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Java automatically provides a no-argument default constructor if no constructors are explicitly defined."
+},
+
+// ========== CÂU 17 ==========
+{
+    id: 17,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Test {
+    int x = 5;
+    int y = 2;
+    public static void main(String[] args) {
+        Test obj;
+        obj.x = 10;
+        obj.y = 20;
+        System.out.println(obj.x + obj.y);
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "7",
+        "30",
+        "90"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The variable 'obj' is declared but not initialized (no 'new Test()'), causing compile-time error."
+},
+
+// ========== CÂU 18 ==========
+{
+    id: 18,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Person {
+    protected String id = "New Id";
+    public static void main(String[] args) {
+        Person p = new Person();
+        p.id = "FPTU";
+        System.out.println(p.id);
+    }
+}</code></pre>`,
+    options: [
+        "FPTU",
+        "null",
+        "New Id",
+        "Runtime error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The id is first initialized to 'New Id', then reassigned to 'FPTU' before being printed."
+},
+
+// ========== CÂU 19 ==========
+{
+    id: 19,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Person {
+    protected String id;
+    public void callPerson(Person p){
+        p.id = "HCM";
+        System.out.print(p.id);
+    }
+    public static void main(String[] args) {
+        Person p = new Person();
+        p.id = "FPT";
+        p.callPerson(p);
+    }
+}</code></pre>`,
+    options: [
+        "HCM",
+        "FPT",
+        "FPTHCM",
+        "HCMFPT"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The callPerson method modifies the id of the passed object to 'HCM', then prints it."
+},
+
+// ========== CÂU 20 ==========
+{
+    id: 20,
+    question: `What is the output of the following code snippet?
+<pre><code>class Test{
+    void method(int x){
+        System.out.print(x*x);
+    }
+    void method(int... a){
+        System.out.print(a.length);
+    }
+    public static void main(String[] args){
+        Test t = new Test();
+        t.method();
+        t.method(2);
+        t.method(3, 4);
+    }
+}</code></pre>`,
+    options: [
+        "042",
+        "034",
+        "234",
+        "242"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "t.method() calls varargs with 0 parameters → 0; t.method(2) calls exact match → 4; t.method(3,4) calls varargs with 2 parameters → 2"
+},
+
+// ========== CÂU 21 ==========
+{
+    id: 21,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    int variableOne = 100;
+}
+class B extends A {
+    int variableTwo = 200;
+}
+public class Main {
+    public static void main(String[] args) {
+        A objA = new B();
+        System.out.println(objA.variableOne);
+    }
+}</code></pre>`,
+    options: [
+        "100",
+        "200",
+        "300",
+        "0"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The reference type A can only access members defined in class A. variableOne from class A is printed."
+},
+
+// ========== CÂU 22 ==========
+{
+    id: 22,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    static void displayMessage() {
+        System.out.println("A Display");
+    }
+}
+class B extends A {
+    static void displayMessage() {
+        System.out.println("B Display");
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        A objA = new B();
+        objA.displayMessage();
+    }
+}</code></pre>`,
+    options: [
+        "A Display",
+        "B Display",
+        "A Display B Display",
+        "Compile error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Static methods are called based on reference type, not object type. So A's displayMessage() is called."
+},
+
+// ========== CÂU 23 ==========
+{
+    id: 23,
+    question: "Which of the following methods belongs to the Object class?",
+    options: [
+        "equals",
+        "compareTo",
+        "concat",
+        "compare"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "equals() is defined in Object class. compareTo() is from Comparable interface, concat() is from String class."
+},
+
+// ========== CÂU 24 ==========
+{
+    id: 24,
+    question: "Which of the following statements is true about superclass and subclass relationships in Java?",
+    options: [
+        "A subclass can access private members of its superclass.",
+        "A superclass can extend multiple subclasses simultaneously.",
+        "A subclass constructor must always call the superclass constructor explicitly.",
+        "A superclass reference can be used to directly access subclass-specific methods.",
+        "A subclass can override a private method in its superclass.",
+        "A subclass can have more than one superclass."
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "A subclass constructor must call a superclass constructor, either explicitly with super() or implicitly (default superclass constructor)."
+},
+
+// ========== CÂU 25 ==========
+{
+    id: 25,
+    question: "Choose multiple correct answers about access modifiers.",
+    options: [
+        "private access modifier should be used for a variable or method to only be accessed within the same class",
+        "public access modifier should be used for a variable or method that should be accessible from any class, regardless of the package",
+        "protected access modifier should be used for a variable or method that should only be accessed within the same class and subclasses, in the same package",
+        "default (no modifier) access modifier only allows access in the same class"
+    ],
+    correct: [0, 1],
+    type: "multiple",
+    explanation: "A and B are correct. C is incorrect because protected allows access to subclasses in different packages. D is incorrect because default allows access within the same package."
+},
+
+// ========== CÂU 26 ==========
+{
+    id: 26,
+    question: "Choose multiple correct answers about getter and setter methods.",
+    options: [
+        "The purpose of a getter method in Java is to get the value of a variable",
+        "The purpose of a setter method in Java is to set the value of a variable",
+        "return keyword used to define getter and setter method in Java",
+        "Access modifiers often used for getter or setter method is public"
+    ],
+    correct: [0, 1, 3],
+    type: "multiple",
+    explanation: "A, B, and D are correct. C is incorrect because return is only used in getters, not setters."
+},
+
+// ========== CÂU 27 ==========
+{
+    id: 27,
+    question: "What is a way to group related classes in Java and it is called a namespace?",
+    options: [
+        "package",
+        "file",
+        "software",
+        "folder"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Packages are Java's mechanism for grouping related classes and interfaces, serving as namespaces."
+},
+
+// ========== CÂU 28 ==========
+{
+    id: 28,
+    question: "Consider a superclass with a private method and a subclass that attempts to override it. What happens in terms of method overriding and access control?",
+    options: [
+        "The subclass can successfully override the private method.",
+        "The private method cannot be overridden in the subclass.",
+        "The subclass can override the private method, but only if it is declared as 'protected' in the superclass",
+        "The subclass can override the private method, but only if it is declared as 'public' in the superclass.",
+        "The subclass can override the private method, but only if it is declared as 'static' in the superclass.",
+        "The access modifier of the superclass method has no impact on method overriding."
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Private methods are not visible to subclasses and therefore cannot be overridden. The subclass method with the same name is treated as a new method."
+},
+
+// ========== CÂU 29 ==========
+{
+    id: 29,
+    question: `What is the output of the following Java program?
+<pre><code>class Demo {
+    void m1(String x) {
+        System.out.println("One");
+    }
+}
+class DemoChild extends Demo {
+    public void m2(String x) {
+        System.out.println("Two");
+        super.m1(x);
+    }
+}
+public class Test {
+    public static void main(String[] args) {
+        Demo obj = new DemoChild();
+        obj.m2("PE");
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "Runtime error",
+        "Output is: Two One",
+        "Output is: One Two"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error because reference type Demo doesn't have m2() method. Only DemoChild has m2()."
+},
+
+// ========== CÂU 30 ==========
+{
+    id: 30,
+    question: "Which of the following is the correct way of implementing an interface ISalary by Employee class?",
+    options: [
+        "class Employee implements ISalary {}",
+        "class Employee extends ISalary {}",
+        "class Employee imports ISalary {}",
+        "class Employee override ISalary {}"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The 'implements' keyword is used to implement interfaces in Java."
+},
+
+// ========== CÂU 31 ==========
+{
+    id: 31,
+    question: "Which of the following statements about abstract classes in Java is correct?",
+    options: [
+        "An abstract class can be instantiated using the 'new' keyword.",
+        "Abstract classes can only have abstract methods.",
+        "Abstract classes can have both abstract and concrete (non-abstract) methods.",
+        "Abstract classes cannot have constructors.",
+        "Abstract classes can be marked as final.",
+        "Abstract classes can extend multiple other classes."
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Abstract classes can contain both abstract and concrete methods, providing partial implementation."
+},
+
+// ========== CÂU 32 ==========
+{
+    id: 32,
+    question: "What is the difference between composition and inheritance in Java?",
+    options: [
+        "Composition is a way to create objects dynamically, while inheritance is a way to reuse code",
+        "Composition is a way to create objects statically, while inheritance is a way to create objects dynamically",
+        "Composition is a way to reuse code, while inheritance is a way to create objects dynamically",
+        "Composition is a way to create objects by combining existing objects, while inheritance is a way to reuse code"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "Composition involves building complex objects from simpler ones (has-a relationship), while inheritance establishes is-a relationships for code reuse."
+},
+
+// ========== CÂU 33 ==========
+{
+    id: 33,
+    question: "What is the purpose of the 'final' keyword in Java?",
+    options: [
+        "To indicate that a method cannot be overridden",
+        "To indicate that an abstract class",
+        "To hide a method of the superclass",
+        "To indicate that a class can only be inherited once"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The final keyword when applied to a method prevents it from being overridden in subclasses."
+},
+
+// ========== CÂU 34 ==========
+{
+    id: 34,
+    question: "Choose the correct statement related to the encapsulation concept in Java",
+    options: [
+        "Data hiding",
+        "Method hiding",
+        "Hiding constructor",
+        "Class hiding"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Encapsulation primarily involves data hiding - restricting direct access to an object's data and providing controlled access through methods."
+},
+
+// ========== CÂU 35 ==========
+{
+    id: 35,
+    question: `Given the following code snippet:
+<pre><code>int[] arr = new int[100];
+ArrayList<Integer> al = new ArrayList();</code></pre>
+Choose the correct statement.`,
+    options: [
+        "arr can not change its length whilst al can change its length",
+        "arr might change its length, but al cannot change the length",
+        "arr and al will have fixed lengths throughout the program",
+        "Access the first element of them by using al[0] and arr[0]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Arrays have fixed length once created, while ArrayLists are dynamically resizable."
+},
+
+// ========== CÂU 36 ==========
+{
+    id: 36,
+    question: "Which of the following statements is used to determine the maximum capacity of an ArrayList named al?",
+    options: [
+        "al.size()",
+        "al.length()",
+        "al.size",
+        "al.length"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ArrayList uses size() method to get the number of elements. Arrays use length property."
+},
+
+// ========== CÂU 37 ==========
+{
+    id: 37,
+    question: "Which of the following is the best description of polymorphism?",
+    options: [
+        "It is the ability for a message/data to be processed in more than one form",
+        "It is the ability for many messages/data to be processed in one way",
+        "It is the ability for a message/data to be processed in only one form",
+        "None of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Polymorphism allows objects of different types to be treated as objects of a common super type, with the specific behavior determined at runtime."
+},
+
+// ========== CÂU 38 ==========
+{
+    id: 38,
+    question: "Which OOP concept allows a class to inherit attributes and behaviors from another class?",
+    options: [
+        "Abstraction",
+        "Encapsulation",
+        "Inheritance",
+        "Polymorphism",
+        "Composition",
+        "Method overloading"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Inheritance enables a class (subclass) to acquire properties and behaviors of another class (superclass)."
+},
+
+// ========== CÂU 39 ==========
+{
+    id: 39,
+    question: "Assume a and b are two ArrayLists of Integer class. Which of the following statements is used to concatenate the two ArrayLists?",
+    options: [
+        "a.add(b)",
+        "a.addAll(b)",
+        "a.concat(b)",
+        "a.concatAll(b)"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "The addAll() method adds all elements from one collection to another, effectively concatenating them."
+},
+
+// ========== CÂU 40 ==========
+{
+    id: 40,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Program {
+    void swap(Integer t1, Integer t2){
+        int temp = t1;
+        t1 = t2;
+        t2 = temp;
+    }
+    void f1(){
+        List<Integer> list = new ArrayList();
+        list.add(1);
+        list.add(2);
+        swap(list.get(0), list.get(1));
+        System.out.println(list);
+    }
+    public static void main(String[] args) {
+        new Program().f1();
+    }
+}</code></pre>`,
+    options: [
+        "[1, 2]",
+        "[2, 1]",
+        "[1, 1]",
+        "[2, 2]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Integer objects are immutable and passed by value. The swap method doesn't affect the original list."
+},
+
+// ========== CÂU 41 ==========
+{
+    id: 41,
+    question: `What is the output of the following code snippet?
+<pre><code>Set<Integer> set1 = new HashSet();
+set1.add(1); set1.add(2); set1.add(3); set1.add(1);
+Set<Integer> set2 = new HashSet();
+set2.add(1); set2.add(4);
+set1.removeAll(set2);
+System.out.println(set1);</code></pre>`,
+    options: [
+        "[2, 3]",
+        "[3, 1]",
+        "[1, 2]",
+        "[4, 1]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "removeAll() removes all elements in set1 that are also in set2. After removal, only 2 and 3 remain."
+},
+
+// ========== CÂU 42 ==========
+{
+    id: 42,
+    question: "In a logistics application, you need to associate each product with its corresponding warehouse location. Illustrate how you would use a Java collection to model this relationship, considering the principles of association and key-value mapping.",
+    options: [
+        "Use a HashMap<Product, WarehouseLocation> for direct key-value mapping.",
+        "Implement a custom ProductWarehouseAssociation class with parallel arrays.",
+        "Utilize a LinkedHashMap<Product, WarehouseLocation> to maintain insertion order.",
+        "Design a TreeMap<Product, WarehouseLocation> for sorted key-value mapping.",
+        "Choose a HashSet<ProductWarehousePair> for efficient storage of associations.",
+        "Implement a custom graph structure to represent the relationships between products and locations."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "HashMap provides O(1) average time complexity for get and put operations, making it ideal for key-value associations where ordering is not required."
+},
+
+// ========== CÂU 43 ==========
+{
+    id: 43,
+    question: `What is the output of the following code snippet?
+<pre><code>Map<Character, Integer> map = new HashMap();
+String data = "hello";
+for (Character c : data.toCharArray()) {
+    if (map.containsKey(c)) {
+        map.put(c, map.get(c) + 1);
+    } else {
+        map.put(c, 0);
+    }
+}
+System.out.println(map.get("L"));</code></pre>`,
+    options: [
+        "1",
+        "2",
+        "0",
+        "3"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The code counts character occurrences but starts counting from 0. 'l' appears twice but the output uses uppercase 'L' which doesn't exist in the map, returning null (but autoboxing to 0 in print)."
+},
+
+// ========== CÂU 44 ==========
+{
+    id: 44,
+    question: `What is the output of the following code snippet?
+<pre><code>TreeMap<String, Integer> t = new TreeMap();
+t.put("c", 1);
+t.put("b", 2);
+t.put("a", 3);
+System.out.println(t.values());</code></pre>`,
+    options: [
+        "[3, 2, 1]",
+        "['c','b','a']",
+        "['a','b','c']",
+        "[1, 2, 3]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "TreeMap sorts keys naturally. Keys 'a','b','c' are sorted alphabetically, so values are accessed in order: 3, 2, 1."
+},
+
+// ========== CÂU 45 ==========
+{
+    id: 45,
+    question: "You are developing a card game, and you need to shuffle a deck of cards thoroughly before each game. Explain how you would use Java collections to achieve an unbiased shuffle, and discuss the importance of randomness in shuffling.",
+    options: [
+        "Use Collections.shuffle() for a simple and unbiased shuffle.",
+        "Implement a custom Fisher-Yates shuffle algorithm for control.",
+        "Choose Random.nextInt() to generate random indices for shuffling.",
+        "Utilize Arrays.sort() with a random comparator for a randomized effect.",
+        "Implement a custom algorithm that swaps each card with a randomly chosen card.",
+        "Use Collections.reverse() for a reverse shuffling effect."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.shuffle() implements a proven unbiased shuffling algorithm and is the standard, reliable approach for shuffling collections."
+},
+
+// ========== CÂU 46 ==========
+{
+    id: 46,
+    question: "In the object stream, which of the following members of an object won't be serialized?",
+    options: [
+        "transient variables",
+        "final variables",
+        "inherited variables",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The transient keyword explicitly marks fields that should not be serialized during object serialization."
+},
+
+// ========== CÂU 47 ==========
+{
+    id: 47,
+    question: "Which of the following classes is the superclass of the PrintWriter and FileWriter classes?",
+    options: [
+        "Writer class",
+        "Input class",
+        "File class",
+        "Object class"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Both PrintWriter and FileWriter extend the Writer abstract class, which is the superclass for character output streams."
+},
+
+// ========== CÂU 48 ==========
+{
+    id: 48,
+    question: "Which of the following statements about the low-level stream and the high-level stream is true?",
+    options: [
+        "The low-level stream's data unit is a byte, high-level stream's data unit is a primitive type.",
+        "The low-level stream's data unit is character UTF-8, high-level stream's data unit is character UNICODE.",
+        "The low-level stream's data unit is a character type, high-level stream's data unit is an object type.",
+        "The low-level stream's data unit is primitive, high-level stream's data unit is character."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Low-level streams handle raw bytes, while high-level streams wrap low-level streams and handle higher-level data types like primitives and objects."
+},
+
+// ========== CÂU 49 ==========
+{
+    id: 49,
+    question: "Which of the following methods of File class is used to check a file is hidden?",
+    options: [
+        "isHidden()",
+        "isDisplay()",
+        "isWrite()",
+        "isRead()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The isHidden() method returns true if the file is hidden according to the platform's definition of hidden files."
+},
+
+// ========== CÂU 50 ==========
+{
+    id: 50,
+    question: `What is the output of the following code snippet:
+<pre><code>String fName = "output.txt";
+int a = 8;
+char c = 'a';
+try {
+    RandomAccessFile f = new RandomAccessFile(fName, "rw");
+    f.writeInt(a);
+    f.writeChar(c);
+} catch (Exception e) {
+    System.out.println(e);
+}
+File f = new File(fName);
+System.out.println(f.length());</code></pre>`,
+    options: [
+        "6",
+        "8",
+        "5",
+        "7"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "writeInt() writes 4 bytes, writeChar() writes 2 bytes (in UTF-16). Total file size = 4 + 2 = 6 bytes."
+},// ========== CÂU 51 ==========
+{
+    id: 51,
+    question: "To run a Java program, which the software must be installed?",
+    options: [
+        "Java Runtime Environment (JRE)",
+        "Eclipse",
+        "Java Development Kit (JDK)",
+        "Netbeans"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "JRE provides the runtime environment needed to execute Java programs, including JVM and core libraries."
+},
+
+// ========== CÂU 52 ==========
+{
+    id: 52,
+    question: "Which of the following concepts does not belong to object-oriented programming features?",
+    options: [
+        "Cross-platform",
+        "Inheritance",
+        "Polymorphism",
+        "Encapsulation"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Cross-platform is a characteristic of Java implementation, not a core OOP feature. OOP features are inheritance, polymorphism, encapsulation, and abstraction."
+},
+
+// ========== CÂU 53 ==========
+{
+    id: 53,
+    question: "Which of the following related to the comment in Java is false?",
+    options: [
+        "/* comment",
+        "/* comment */",
+        "/** comment */",
+        "//comment"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The first option is incomplete and will cause a compilation error as it doesn't close the comment."
+},
+
+// ========== CÂU 54 ==========
+{
+    id: 54,
+    question: "Which of the following is a primitive data type in Java?",
+    options: [
+        "String",
+        "Float",
+        "byte",
+        "ArrayList",
+        "Integer",
+        "Character"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "byte is a primitive data type. String, Float, Integer, Character are wrapper classes, ArrayList is a collection class."
+},
+
+// ========== CÂU 55 ==========
+{
+    id: 55,
+    question: `What will be the output of the following code?
+<pre><code>public class Test1 {
+    int x;
+    x = 5;
+    public static void main(String[] args) {
+        Test1 t = new Test1();
+        System.out.println(t.x);
+    }
+}</code></pre>`,
+    options: [
+        "compile error",
+        "runtime error",
+        "5",
+        "0"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error because 'x = 5;' is an assignment statement outside any method/constructor block."
+},
+
+// ========== CÂU 56 ==========
+{
+    id: 56,
+    question: `What will be the output of the following code?
+<pre><code>public class Test10 {
+    public static void main(String[] args) {
+        Integer x = new Integer(5);
+        Integer y = new Integer(10);
+        System.out.println((String)(x+y));
+    }
+}</code></pre>`,
+    options: [
+        "15",
+        "510",
+        "Runtime error",
+        "Compiler Error"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "Compiler error because you cannot cast int (result of x+y) to String. Should use String.valueOf(x+y) or Integer.toString(x+y)."
+},
+
+// ========== CÂU 57 ==========
+{
+    id: 57,
+    question: `What is the output of the code snippet?
+<pre><code>public class Test {
+    public static void main(String[] args) {
+        try {
+            int kg = 10 / 0;
+            throw new Exception();
+        } catch (ArithmeticException e) {
+            System.out.println("Error1");
+        } catch (NumberFormatException e) {
+            System.out.println("Error2");
+        } catch (Exception e) {
+            System.out.println("Error3");
+        } finally {
+            System.out.println("Finish");
+        }
+    }
+}</code></pre>`,
+    options: [
+        "Error1\nFinish",
+        "Error2\nFinish", 
+        "Error3\nFinish",
+        "Finish"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ArithmeticException is caught first due to division by zero, then finally block always executes."
+},
+
+// ========== CÂU 58 ==========
+{
+    id: 58,
+    question: "Which of the following statements is correct to declare a class named Cat?",
+    options: [
+        "class Cat/*something*/",
+        "class public Cat(){/*something*/",
+        "Class Cat/*something*/",
+        "public Cat class{/*something*/"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The correct syntax is 'class ClassName'. Access modifiers like 'public' are optional and come before 'class'."
+},
+
+// ========== CÂU 59 ==========
+{
+    id: 59,
+    question: "What are components of a class in Java OOP? Choose multiple correct answers.",
+    options: [
+        "Constructors are responsible for object creation",
+        "Attributes, Fields, Properties of a class represents by variables", 
+        "Behaviours, Modification code represent by methods or functions",
+        "main() method for execution of the class"
+    ],
+    correct: [0, 1, 2],
+    type: "multiple",
+    explanation: "A, B, C are correct. D is incorrect because main() method is only required for executable classes, not all classes."
+},
+
+// ========== CÂU 60 ==========
+{
+    id: 60,
+    question: "Which of the following statements related to the constructors is false?",
+    options: [
+        "The constructor can be overridden.",
+        "The constructor can be overloaded.",
+        "The 'this' keyword and 'super' keyword can be used in the constructor.",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Constructors cannot be overridden because they are not inherited. They can be overloaded (multiple constructors with different parameters)."
+},
+
+// ========== CÂU 61 ==========
+{
+    id: 61,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Person {
+    String id = "P1";
+    public Person(String id) {
+        this.id = id;
+    }
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public static void main(String[] args) {
+        Person p = new Person();
+        p.setId("FPTU");
+        System.out.println(p.getId());
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "null", 
+        "P1",
+        "FPTU"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error because no default constructor is available (a parameterized constructor is defined but no default constructor)."
+},
+
+// ========== CÂU 62 ==========
+{
+    id: 62,
+    question: "Which of the following statements related to the protected access modifier is true?",
+    options: [
+        "It allows the outside package access",
+        "It does not allow within-package access", 
+        "The protected members must be initialized before use",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Protected allows access within the same package AND by subclasses in different packages."
+},
+
+// ========== CÂU 63 ==========
+{
+    id: 63,
+    question: `Assume the following code snippet:
+<pre><code>Object objA = new Object();
+Object objB = new Object();</code></pre>
+Which of the following statements is correct to compare objA with objB?`,
+    options: [
+        "objA.equals(objB)",
+        "compareObjects(objA, objB)",
+        "Object.compareTo(objA, objB)", 
+        "Object.compare(objA,objB)"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The equals() method is used to compare objects for equality. By default, it compares references, but can be overridden for value comparison."
+},
+
+// ========== CÂU 64 ==========
+{
+    id: 64,
+    question: "What is a subclass in Java inheritance?",
+    options: [
+        "The class that inherits from another class",
+        "The class that is inherited from multiple classes", 
+        "The final class in the inheritance chain",
+        "The class that has abstract methods"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "A subclass (child class) inherits from a superclass (parent class) using the 'extends' keyword."
+},
+
+// ========== CÂU 65 ==========
+{
+    id: 65,
+    question: "Which keyword is used to declare inheritance between two classes in Java?",
+    options: [
+        "extends",
+        "imports", 
+        "super",
+        "implement"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The 'extends' keyword is used for class inheritance. 'implements' is used for interface implementation."
+},
+
+// ========== CÂU 66 ==========
+{
+    id: 66,
+    question: "What is the primary purpose of using a superclass and subclass relationship in Java?",
+    options: [
+        "To restrict access to certain methods or fields.",
+        "To create multiple instances of a class.",
+        "To implement multiple inheritance.", 
+        "To achieve code reusability and facilitate polymorphism.",
+        "To enforce encapsulation.",
+        "To establish a one-to-one mapping between classes."
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "The main purposes of inheritance are code reuse and enabling polymorphism through method overriding."
+},
+
+// ========== CÂU 67 ==========
+{
+    id: 67,
+    question: "What is the 'instanceof' operator used for?",
+    options: [
+        "To check whether an object is an instance of a particular class or not",
+        "To create a new instance of a class", 
+        "To compare two objects for equality",
+        "To check if an object is null"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The instanceof operator checks if an object is an instance of a specific class or interface, returning a boolean value."
+},
+
+// ========== CÂU 68 ==========
+{
+    id: 68,
+    question: `What will be the output of the following Java code?
+<pre><code>class A {
+    int a = 5;
+    public int getA() {
+        return a;
+    }
+}
+class B extends A {
+    private int a = 6;
+    public void rollBackA() {
+        a++;
+        a = super.getA();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        A objA = new A();
+        B objB = new B();
+        objB.rollBackA();
+        System.out.format("%d, %d%n", objA.getA(), objB.getA());
+    }
+}</code></pre>`,
+    options: [
+        "5, 5",
+        "6, 6", 
+        "5, 6",
+        "6, 5"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "objA.getA() returns 5. objB.getA() inherits from A and returns 5 (not the shadowed private variable in B)."
+},
+
+// ========== CÂU 69 ==========
+{
+    id: 69,
+    question: `What is the output following the code snippet?
+<pre><code>public class Main {
+    void m1(String x) {
+        System.out.print("One ");
+    }
+    protected void m1(String x, String y) {
+        System.out.println("Two");
+    }
+    public static void main(String[] args) {
+        Main obj = new Main();
+        obj.m1("ABC");
+        obj.m1("PQR","XYZ");
+    }
+}</code></pre>`,
+    options: [
+        "One Two",
+        "Two One", 
+        "Two Two",
+        "One One"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Method overloading - first call uses m1(String), second call uses m1(String, String)."
+},
+
+// ========== CÂU 70 ==========
+{
+    id: 70,
+    question: "Which of the following are NOT the characteristics of interfaces?",
+    options: [
+        "All interfaces extend to the Object class.",
+        "All constant declarations are implicitly public, static, and final.", 
+        "Methods may not be declared as final or static.",
+        "All method declarations are implicitly public and abstract."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Interfaces do not extend Object class. All interfaces implicitly extend java.lang.Object but not through the 'extends' keyword in the interface declaration."
+},
+
+// ========== CÂU 71 ==========
+{
+    id: 71,
+    question: `What is the output of the following Java program?
+<pre><code>abstract class A {
+    private String my_name = null;
+    public String myName() {
+        my_name = "test";
+        return my_name;
+    }
+    abstract void display();
+}
+public class Main extends A {
+    void display() {
+        String n = myName();
+        System.out.println(n);
+    }
+    public static void main(String args[]) {
+        A obj = new Main();
+        obj.display();
+    }
+}</code></pre>`,
+    options: [
+        "test",
+        "Runtime error", 
+        "null",
+        "None of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The concrete class Main implements the abstract method display() and calls myName() which returns 'test'."
+},
+
+// ========== CÂU 72 ==========
+{
+    id: 72,
+    question: "Choose multiple correct answers about inheritance.",
+    options: [
+        "Inheritance allows a class to inherit the properties and methods of another class",
+        "The keyword 'extends' is used to indicate inheritance in Java. It is used in the declaration of a subclass to specify the superclass that it is inheriting from.",
+        "A subclass can inherit the private members of the superclass", 
+        "Java supports both multiple inheritance of classes and interfaces"
+    ],
+    correct: [0, 1],
+    type: "multiple",
+    explanation: "A and B are correct. C is wrong - private members are not inherited. D is wrong - Java supports multiple inheritance only for interfaces, not classes."
+},
+
+// ========== CÂU 73 ==========
+{
+    id: 73,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    int i = 100;
+    public void printValue() {
+        System.out.print("A");
+    }
+}
+class B extends A {
+    int i = 120;
+    public void printValue() {
+        System.out.print("B");
+    }
+}
+public class Main {
+    public static void main(String args[]) {
+        A a = new B();
+        a.printValue();
+        System.out.print(a.i);
+    }
+}</code></pre>`,
+    options: [
+        "B100",
+        "B120", 
+        "A100",
+        "A120"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Method is overridden (dynamic binding - B's printValue), but fields are not overridden (static binding - A's i)."
+},
+
+// ========== CÂU 74 ==========
+{
+    id: 74,
+    question: "In a banking application, you need to represent customer accounts using object arrays. Which OOP concept allows you to create a blueprint for the Account class?",
+    options: [
+        "Inheritance",
+        "Abstraction", 
+        "Encapsulation",
+        "Polymorphism",
+        "Composition",
+        "Interface"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Abstraction involves creating abstract representations (blueprints) of real-world entities using classes."
+},
+
+// ========== CÂU 75 ==========
+{
+    id: 75,
+    question: "Which of the following statements is used to get the size of a one-dimensional array in Java? Assume that array is given by this statement: int[] arr = new int[100];",
+    options: [
+        "arr.length",
+        "arr.length()", 
+        "arr.size",
+        "arr.size()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Arrays use the 'length' field, not method. Collections use size() method."
+},
+
+// ========== CÂU 76 ==========
+{
+    id: 76,
+    question: `Given the following code snippet:
+<pre><code>float[] arr = new float[100];   //Line 1
+arr[0] = 3.4;    //Line 2</code></pre>
+Choose the correct statement.`,
+    options: [
+        "3.4 is a double type by default so we need to explicitly cast it to float",
+        "3.4 is a float type by default so we don't need to explicitly cast it to float", 
+        "There is no problem with these code lines",
+        "Line 1 will throw the indexOutOfBound exception"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "3.4 is a double literal by default. Should use 3.4f or (float)3.4 to assign to float array."
+},
+
+// ========== CÂU 77 ==========
+{
+    id: 77,
+    question: "You are tasked with implementing a system that tracks the frequency of words in a large text document. Explain how you would use a Java collection to efficiently achieve this, emphasizing the principles of abstraction and encapsulation.",
+    options: [
+        "Utilize a HashMap<String, Integer> for efficient word frequency tracking.",
+        "Implement a LinkedList<String> to store words and their occurrences.", 
+        "Use a PriorityQueue<String> to prioritize words based on frequency.",
+        "Employ a HashSet<String> for unique word storage.",
+        "Implement a custom WordFrequencyTracker class using a binary search tree.",
+        "Utilize a TreeMap<String, Integer> for a sorted mapping of words and frequencies."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "HashMap provides O(1) average time complexity for put and get operations, making it most efficient for frequency counting where ordering is not required."
+},
+
+// ========== CÂU 78 ==========
+{
+    id: 78,
+    question: "Which method is used to find the maximum element in a collection of the Collections class?",
+    options: [
+        "max()",
+        "findMax()", 
+        "getMax()",
+        "maxElement()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.max() returns the maximum element of the given collection, according to the natural ordering of its elements."
+},
+
+// ========== CÂU 79 ==========
+{
+    id: 79,
+    question: "Can we add a duplicated element into a Set in Java?",
+    options: [
+        "No, if we add a duplicated element into a Set, the Set will keep the old element and remove the new one.",
+        "No, the procedure will raise an exception", 
+        "Yes, we can add a duplicated element into a Set and the Set will keep the new element and remove the old one",
+        "Yes, we can add a duplicated element into a Set and the Set will maintain 2 elements including the old element and the duplicated one"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Sets do not allow duplicate elements. Adding a duplicate returns false and the set remains unchanged."
+},
+
+// ========== CÂU 80 ==========
+{
+    id: 80,
+    question: "You are working on an application that simulates a deck of playing cards. Explain how you would use Java collections to represent the deck, ensuring that cards are efficiently shuffled, drawn, and replaced. Discuss the choice of collection type and any considerations for card removal and addition.",
+    options: [
+        "Utilize an ArrayList<Card> for easy manipulation and shuffling.",
+        "Design a custom Deck class with a circular linked list for efficient cycling.", 
+        "Use a HashSet<Card> for unique card storage.",
+        "Implement a TreeSet<Card> for sorted card ordering.",
+        "Choose a PriorityQueue<Card> for card prioritization based on rank.",
+        "Utilize a custom CardDeck class with an embedded array for control over addition and removal."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ArrayList provides efficient random access, easy shuffling with Collections.shuffle(), and straightforward card drawing/removal from specific positions."
+},
+
+// ========== CÂU 81 ==========
+{
+    id: 81,
+    question: "What is the size of an ArrayList if capacity is NOT specified during initialization?",
+    options: [
+        "0",
+        "1", 
+        "16",
+        "10"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "The default initial capacity of ArrayList is 10 when created with the no-argument constructor."
+},
+
+// ========== CÂU 82 ==========
+{
+    id: 82,
+    question: "What is the main difference between HashSet and TreeSet?",
+    options: [
+        "HashSet uses a hash table; TreeSet uses a balanced tree.",
+        "HashSet allows duplicate elements; TreeSet does not.", 
+        "HashSet sorts elements based on natural ordering; TreeSet does not.",
+        "HashSet allows null elements; TreeSet does not."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "HashSet uses hash table with O(1) average time, no ordering. TreeSet uses red-black tree with O(log n) time, maintains sorted order."
+},
+
+// ========== CÂU 83 ==========
+{
+    id: 83,
+    question: "How do you check if a File object refers to a file (NOT a directory) in Java?",
+    options: [
+        "isFile()",
+        "checkFile()", 
+        "isNotDirectory()",
+        "notIsDirectory()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The isFile() method returns true if the File object represents a file, false if it represents a directory or doesn't exist."
+},
+
+// ========== CÂU 84 ==========
+{
+    id: 84,
+    question: "In the object stream, which of the following members of an object won't be serialized?",
+    options: [
+        "transient variables",
+        "final variables", 
+        "inherited variables",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "transient variables are explicitly excluded from serialization. final variables can be serialized if they are not transient."
+},
+
+// ========== CÂU 85 ==========
+{
+    id: 85,
+    question: "Which of the following exceptions is thrown when an attempt is made to open a file that CANNOT be found by the FileInputStream class?",
+    options: [
+        "FileNotFoundException",
+        "IOException", 
+        "FileAccessException",
+        "NotFoundIOException"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "FileInputStream constructor throws FileNotFoundException if the file does not exist or cannot be opened for reading."
+},
+
+// ========== CÂU 86 ==========
+{
+    id: 86,
+    question: "For the low-level binary stream class FileInputStream, which of the following methods is used to retrieve a byte from a source stream?",
+    options: [
+        "read()",
+        "readByte()", 
+        "fetch()",
+        "fetchLine()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The read() method reads the next byte of data from the input stream and returns it as an int value."
+},
+
+// ========== CÂU 87 ==========
+{
+    id: 87,
+    question: "What is the purpose of the FileOutputStream class in Java?",
+    options: [
+        "To write raw bytes to a file",
+        "To write primitive data types to a file", 
+        "To create an object stream for a file",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "FileOutputStream is used for writing raw bytes to a file. For writing primitive data types, use DataOutputStream wrapped around FileOutputStream."
+},
+
+// ========== CÂU 88 ==========
+{
+    id: 88,
+    question: `What is the output of the following code snippet?
+<pre><code>File f = new File("test.txt");
+try {
+    FileReader fr = new FileReader(f);
+    BufferedReader bf = new BufferedReader(fr);
+    int k = 2;
+    String line = "";
+    for (int i = 0; i < k; i++) {
+        line = bf.readLine();
+    }
+    System.out.println(line);
+} catch(IOException e) {
+    System.out.println(e);
+}</code></pre>
+Assumes that test.txt has the content as follows:
+Hello
+Xin chao
+Hallo
+Anyong Haseyo`,
+    options: [
+        "Xin chao",
+        "Hello", 
+        "Hallo",
+        "Anyong Haseyo"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The loop reads 2 lines (i=0 and i=1), so line variable contains the second line 'Xin chao'."
+},
+
+// ========== CÂU 89 ==========
+{
+    id: 89,
+    question: "Which of the following statements is used to compile the program.java file?",
+    options: [
+        "javac program.java",
+        "java -java program.java", 
+        "javac -c program.java",
+        "java -j program.java"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "javac is the Java compiler command used to compile .java source files into .class bytecode files."
+},
+
+// ========== CÂU 90 ==========
+{
+    id: 90,
+    question: "A Java source code will be compiled to the file in which of the following extensions?",
+    options: [
+        ".class",
+        ".java", 
+        ".exe",
+        ".bat"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java source files (.java) are compiled into bytecode files (.class) that can be executed by JVM."
+},
+
+// ========== CÂU 91 ==========
+{
+    id: 91,
+    question: "Which of the following is NOT a Java feature?",
+    options: [
+        "Use of pointers.",
+        "Ease of learning.", 
+        "It is a secure language.",
+        "Independent Platform."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java does not support explicit pointer arithmetic like C/C++ for security reasons and memory safety."
+},
+
+// ========== CÂU 92 ==========
+{
+    id: 92,
+    question: "Which of the following is a Java primitive type?",
+    options: [
+        "boolean",
+        "String", 
+        "Object",
+        "Class"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "boolean is a primitive type. String, Object, and Class are reference types (classes)."
+},
+
+// ========== CÂU 93 ==========
+{
+    id: 93,
+    question: "Choose multiple correct answers about variables and constants.",
+    options: [
+        "The default value of an uninitialized int variable in Java is 0",
+        "Constants can be changed during the execution of a program", 
+        "Variables and constants are both used to store values in Java",
+        "Variables can be changed during the execution of a program"
+    ],
+    correct: [0, 2, 3],
+    type: "multiple",
+    explanation: "A, C, D are correct. B is wrong because constants (declared with final) cannot be changed after initialization."
+},
+
+// ========== CÂU 94 ==========
+{
+    id: 94,
+    question: "Concerning rules and conventions for naming variables in Java, choose an incorrect statement.",
+    options: [
+        "An identifier can begin with any character except '$' and '_'",
+        "An identifier can begin with a character.", 
+        "An identifier can begin with the dollar sign character.",
+        "An identifier can begin with the underscore character."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "A is incorrect because identifiers CAN begin with '$' and '_'. The restriction is that they cannot begin with a digit."
+},
+
+// ========== CÂU 95 ==========
+{
+    id: 95,
+    question: `What is the output of the code snippet?
+<pre><code>public class Test {
+    public static void main(String[] args) {
+        int result;
+        System.out.println(result = true ? 100 : 5);
+    }
+}</code></pre>`,
+    options: [
+        "100",
+        "5", 
+        "0",
+        "Runtime error."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Ternary operator returns 100 because condition is true. The assignment and print happen in the same statement."
+},
+
+// ========== CÂU 96 ==========
+{
+    id: 96,
+    question: "Which of the following packages contains the Scanner class used to input data via keyboard?",
+    options: [
+        "java.util",
+        "java.net", 
+        "java.io",
+        "java.awt"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Scanner class is in java.util package, used for parsing primitive types and strings using regular expressions."
+},
+
+// ========== CÂU 97 ==========
+{
+    id: 97,
+    question: "Which of the following is one of the exception types in Java?",
+    options: [
+        "RuntimeException",
+        "CompileException", 
+        "SyntaxException",
+        "LogicException"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "RuntimeException is the superclass of those exceptions that can be thrown during normal operation of JVM."
+},
+
+// ========== CÂU 98 ==========
+{
+    id: 98,
+    question: "Which of the following statements is one of the advantages of OOP?",
+    options: [
+        "The systems can be easily upgraded from small to large systems.",
+        "OOP leads to higher programmer productivity, better software quality, and higher maintenance costs.", 
+        "OOP language did not allow breaking the program into bit-sized problems that can be solved easily",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "OOP supports modularity and scalability, making it easier to extend and maintain systems as they grow."
+},
+
+// ========== CÂU 99 ==========
+{
+    id: 99,
+    question: "What operator is used to access the member(field or method) of the object?",
+    options: [
+        ".",
+        "{}", 
+        "[]",
+        ":"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The dot operator (.) is used to access members (fields and methods) of an object or class."
+},
+
+// ========== CÂU 100 ==========
+{
+    id: 100,
+    question: "Which of the following is one of the characteristics of the constructors?",
+    options: [
+        "They have the same name as the class in which they are declared.",
+        "They may be inherited from a superclass.", 
+        "They may not make exceptions.",
+        "They must be declared public."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Constructors must have the same name as the class. They are not inherited, can throw exceptions, and can have various access modifiers."
+},
+// ========== CÂU 101 ==========
+{
+    id: 101,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    final int a = 100;
+}
+class B extends A {
+    final int a = 200;
+}
+public class Main extends B {
+    final int a = 300;
+    public static void main(String args[]) {
+        Main t = new A();
+        System.out.print(t.a);
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "300",
+        "200",
+        "100"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error because 'new A()' cannot be assigned to Main reference - A is superclass of Main."
+},
+
+// ========== CÂU 102 ==========
+{
+    id: 102,
+    question: "What is the term for the ability of a single method name to represent multiple implementations based on the method signature or parameters?",
+    options: [
+        "Overloading",
+        "Overriding",
+        "Abstracting",
+        "Encapsulation",
+        "Inheritance",
+        "Derivation"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Method overloading allows multiple methods with same name but different parameters in the same class."
+},
+
+// ========== CÂU 103 ==========
+{
+    id: 103,
+    question: `What is the output following the code snippet?
+<pre><code>class DemoClass {
+    static void m() {
+        System.out.println("A");
+    }
+}
+class DemoClassChild extends DemoClass {
+    static void m() {
+        System.out.println("B");
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        DemoClass obj = new DemoClassChild();
+        obj.m();
+    }
+}</code></pre>`,
+    options: [
+        "A",
+        "B",
+        "A B",
+        "B A"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Static methods are called based on reference type, not object type. So DemoClass's m() is called."
+},
+
+// ========== CÂU 104 ==========
+{
+    id: 104,
+    question: `Assuming the following code snippet:
+<pre><code>public class Student {
+    public abstract double numberOfSubject();
+}</code></pre>
+Which of the following statements is true?`,
+    options: [
+        "The class Student must be defined as the abstract class",
+        "The keywords public and abstract cannot be used together.",
+        "The method numberOfSubject() must have a body.",
+        "The method numberOfSubject() must declared with the @Override"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "If a class contains an abstract method, the class itself must be declared abstract."
+},
+
+// ========== CÂU 105 ==========
+{
+    id: 105,
+    question: `What is the output following code snippet:
+<pre><code>int sum = 0;
+for(int i = 0; i <= 10; i++) {
+    sum += (i % 2 == 0 ? i : -i);
+}
+System.out.println(sum);</code></pre>`,
+    options: [
+        "5",
+        "2",
+        "The program will raise an exception.",
+        "3"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Even numbers are added, odd numbers are subtracted: 0-1+2-3+4-5+6-7+8-9+10 = 5"
+},
+
+// ========== CÂU 106 ==========
+{
+    id: 106,
+    question: `Given the following code snippet:
+<pre><code>int[] arr = new int[100];</code></pre>
+Which of the following statements is correct?`,
+    options: [
+        "The maximum number of elements of the arr is 100",
+        "The maximum index of the arr is 100",
+        "arr[100] = 100",
+        "Each element in the arr will be 1 by default"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Array size is fixed at 100 elements. Maximum index is 99 (0-based indexing). Default values are 0."
+},
+
+// ========== CÂU 107 ==========
+{
+    id: 107,
+    question: "In a banking application, you need to represent customer accounts using object arrays. Which OOP concept allows you to create a blueprint for the Account class?",
+    options: [
+        "Inheritance",
+        "Abstraction",
+        "Encapsulation",
+        "Polymorphism",
+        "Composition",
+        "Interface"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Abstraction involves creating abstract representations (blueprints) of real-world entities using classes."
+},
+
+// ========== CÂU 108 ==========
+{
+    id: 108,
+    question: "Which method is used to convert an array to a List in Java?",
+    options: [
+        "Arrays.asList()",
+        "Arrays.toList()",
+        "Arrays.convertToList()",
+        "Arrays.arrayToList()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Arrays.asList() returns a fixed-size list backed by the specified array."
+},
+
+// ========== CÂU 109 ==========
+{
+    id: 109,
+    question: `What is the output of the following code snippet?
+<pre><code>Set<Integer> set1 = new TreeSet();
+set1.add(1); set1.add(3); set1.add(2); set1.add(1);
+System.out.println(set1);</code></pre>`,
+    options: [
+        "[1, 2, 3]",
+        "[1, 1, 2, 3]",
+        "[1, 3, 2]",
+        "[1, 3, 2, 1]"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "TreeSet automatically sorts elements and removes duplicates. Result is sorted set [1, 2, 3]."
+},
+
+// ========== CÂU 110 ==========
+{
+    id: 110,
+    question: `What is the output of the following code snippet?
+<pre><code>Map<Character, Integer> map = new TreeMap();
+String data = "hello";
+for (Character c : data.toCharArray()) {
+    if (map.containsKey(c)) {
+        map.put(c, map.get(c) + 1);
+    } else {
+        map.put(c, 0);
+    }
+}
+System.out.println(map.keySet());</code></pre>`,
+    options: [
+        "['e','h','l','o']",
+        "['h','o','e','l']",
+        "['e','o','h','l']",
+        "['h','e','l','o']"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "TreeMap sorts keys naturally. Characters sorted: e, h, l, o (alphabetical order)."
+},
+
+// ========== CÂU 111 ==========
+{
+    id: 111,
+    question: "How does the try-catch-finally statement work?",
+    options: [
+        "The code inside the try block is executed, and if an exception occurs, it is caught and handled by the catch block. The code inside the finally block is executed regardless of whether an exception occurred or not.",
+        "The code inside the try block is executed, and if an exception occurs, it is caught and handled by the finally block. The code inside the catch block is executed regardless of whether an exception occurred or not.",
+        "The code inside the try block is executed, and if an exception occurs, it is caught and handled by the catch block. The code inside the finally block is executed only if an exception occurred.",
+        "The code inside the try block is executed, and if an exception occurs, it is caught and handled by the catch block. The code inside the finally block is executed only if an exception occurred and was not caught by the catch block."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Finally block always executes whether exception occurs or not, making it ideal for cleanup code."
+},
+
+// ========== CÂU 112 ==========
+{
+    id: 112,
+    question: "Which of the following methods of the FileOutputStream class is used to write bytes to a target stream?",
+    options: [
+        "write()",
+        "print()",
+        "writeLine()",
+        "println()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "write() method writes specified byte or byte array to the output stream."
+},
+
+// ========== CÂU 113 ==========
+{
+    id: 113,
+    question: "Which of the following methods of File class is used to check a file is hidden?",
+    options: [
+        "isHidden()",
+        "isDisplay()",
+        "isWrite()",
+        "isRead()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "isHidden() tests whether the file denoted by this abstract pathname is a hidden file."
+},
+
+// ========== CÂU 114 ==========
+{
+    id: 114,
+    question: `What is the output of the following code snippet?
+<pre><code>String fName = "output.txt";
+byte[] array = {65, 66, 67};
+byte[] arr = new byte[3];
+try {
+    RandomAccessFile f = new RandomAccessFile(fName, "rw");
+    f.write(array);
+    f.seek(0);
+    f.read(arr);
+    String str1 = new String(arr);
+    System.out.println(str1);
+} catch (Exception e) {
+    System.out.println(e);
+}</code></pre>`,
+    options: [
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Bytes 65,66,67 correspond to ASCII 'A','B','C'. Written and read in same order."
+},
+
+// ========== CÂU 115 ==========
+{
+    id: 115,
+    question: "What is a correct statement about an array in Java?",
+    options: [
+        "The array can store elements that are the same data types.",
+        "The index of the array can be a float or double data type.",
+        "The size() is a method that returns the number of elements in an array.",
+        "The array has a dynamic size."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Arrays store homogeneous elements (same data type). Index must be int, use length field (not method), size is fixed."
+},
+
+// ========== CÂU 116 ==========
+{
+    id: 116,
+    question: `Assume that all library files are imported.
+What is the output of the following code snippet?
+<pre><code>public static void main(String[] args) {
+    Date a = new Date();
+    boolean result = a instanceof Date;
+    System.out.print("a is an instance of " + result);
+}</code></pre>`,
+    options: [
+        "a is an instance of true",
+        "a is an instance of Object",
+        "a is an instance of Date",
+        "a is an instance of false"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "instanceof returns boolean true/false. The output concatenates string with boolean value."
+},
+
+// ========== CÂU 117 ==========
+{
+    id: 117,
+    question: "Which data type is not a reference data type?",
+    options: [
+        "byte",
+        "Class",
+        "Array",
+        "Interface"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "byte is primitive type. Class, Array, Interface are reference types."
+},
+
+// ========== CÂU 118 ==========
+{
+    id: 118,
+    question: "Choose the correct statement related to the constructors.",
+    options: [
+        "Constructor is a block of codes similar to the method. It is called when an instance of the class is created",
+        "Constructor is a special type of method that is used to initialize default members of the object only",
+        "Constructor is an abstract method with an empty body",
+        "Constructor is a method that does not allow parameters"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Constructors are special methods that initialize objects when they are created with 'new' keyword."
+},
+
+// ========== CÂU 119 ==========
+{
+    id: 119,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Main {
+    public int a;
+    public long b;
+    public void test(long b) {
+        System.out.println("long b");
+    }
+    public void test(int a) {
+        System.out.println("int a");
+    }
+    public static void main(String[] args) {
+        Main e = new Main();
+        e.test(9 * 1000000000);
+    }
+}</code></pre>`,
+    options: [
+        "int a",
+        "long a",
+        "long b",
+        "Runtime error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: ""
+},
+
+// ========== CÂU 120 ==========
+{
+    id: 120,
+    question: "Choose the correct statement about the 'this' keyword.",
+    options: [
+        "It can be used to refer to the current object in a method or constructor",
+        "It can be used to refer to the object of the superclass",
+        "It can be used to invoke methods of the superclass",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "'this' refers to current object instance. 'super' refers to superclass."
+},
+
+// ========== CÂU 121 ==========
+{
+    id: 121,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    int i, j;
+    A() {
+        i = 1;
+        j = 2;
+    }
+}
+public class Main {
+    public static void main(String args[]) {
+        A obj1 = new A();
+        A obj2 = new A();
+        System.out.println(obj1.equals(obj2));
+    }
+}</code></pre>`,
+    options: [
+        "false",
+        "true",
+        "obj1.equals(obj2)",
+        "Runtime error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Default equals() compares references (memory addresses), not content. obj1 and obj2 are different objects."
+},
+
+// ========== CÂU 122 ==========
+{
+    id: 122,
+    question: `What is the output of the following Java program?
+<pre><code>class A {
+    void displayMessage() {
+        System.out.println("A Display");
+    }
+}
+class B extends A {
+    @Override
+    void displayMessage() {
+        System.out.println("B Display");
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        A objA = new B();
+        objA.displayMessage();
+    }
+}</code></pre>`,
+    options: [
+        "B Display",
+        "A Display",
+        "A Display B Display",
+        "Compile error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Runtime polymorphism - method called depends on actual object type (B), not reference type (A)."
+},
+
+// ========== CÂU 123 ==========
+{
+    id: 123,
+    question: "What is method overriding in Java?",
+    options: [
+        "Re-implementing a method in the subclass with the same signature as in the superclass",
+        "Creating multiple methods with the same name but different parameters",
+        "Calling a method from another method",
+        "Re-implementing another method in the same class with the same signature"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Method overriding provides specific implementation in subclass for method already defined in superclass."
+},
+
+// ========== CÂU 124 ==========
+{
+    id: 124,
+    question: "In Java polymorphism, which of the following types of methods is dynamically linked or implemented at runtime?",
+    options: [
+        "Method overriding",
+        "Method overloading",
+        "Constructors",
+        "Static methods"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Method overriding uses dynamic binding (runtime polymorphism). Method overloading uses static binding (compile-time)."
+},
+
+// ========== CÂU 125 ==========
+{
+    id: 125,
+    question: `Consider an abstract class "Shape" with an abstract method "calculateArea()." If a concrete subclass "Circle" extends "Shape" and provides an implementation for "calculateArea()," what happens when an object of the "Circle" class is created and the "calculateArea()" method is called?`,
+    options: [
+        "The abstract method in the superclass is executed.",
+        "The concrete method in the subclass is executed.",
+        "The program will not compile.",
+        "An exception is thrown at runtime.",
+        "Both the abstract method in the superclass and the concrete method in the subclass are executed.",
+        "The result depends on whether the 'calculateArea()' method is declared as static."
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "The concrete implementation in Circle class is executed through runtime polymorphism."
+},
+
+// ========== CÂU 126 ==========
+{
+    id: 126,
+    question: "What happens when you try to assign an array to another array in Java?",
+    options: [
+        "Both arrays reference to the same memory location.",
+        "A new copy of the array is created.",
+        "It results in a compilation error.",
+        "Java does not allow array assignment."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Array assignment copies the reference, not the elements. Both variables point to same array object."
+},
+
+// ========== CÂU 127 ==========
+{
+    id: 127,
+    question: "Which of the following classes is used for shuffling an ArrayList in Java?",
+    options: [
+        "Collections",
+        "CollectionList",
+        "Arrays",
+        "Array.Util"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.shuffle() randomly permutes the specified list using default source of randomness."
+},
+
+// ========== CÂU 128 ==========
+{
+    id: 128,
+    question: "All abstract data structures: List, Set, Map is implemented in which of the following types?",
+    options: [
+        "Interface",
+        "Abstract class",
+        "Concrete class",
+        "Derived class"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "List, Set, Map are interfaces that define contracts. Concrete implementations like ArrayList, HashSet, HashMap implement these interfaces."
+},
+
+// ========== CÂU 129 ==========
+{
+    id: 129,
+    question: "How do you find the frequency of occurrence of an element in a collection of the Collections class?",
+    options: [
+        "frequency()",
+        "countOccurrence()",
+        "frequencyOf()",
+        "findFrequency()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.frequency() returns the number of elements in the specified collection equal to the specified object."
+},
+
+// ========== CÂU 130 ==========
+{
+    id: 130,
+    question: "Which of the following statements related to inserting a new element into an ArrayList is true?",
+    options: [
+        "We use the add method to insert a new element into the ArrayList object",
+        "We cannot insert a new element in the middle of the ArrayList object",
+        "We cannot insert a new element at the beginning of the ArrayList object",
+        "We use the put method to insert a new element into the ArrayList object"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ArrayList provides add() method to insert elements at end or at specific position."
+},
+
+// ========== CÂU 131 ==========
+{
+    id: 131,
+    question: `What is the output of the following code snippet?
+<pre><code>Set<Integer> set = new HashSet();
+set.add(1); set.add(2); set.add(3); set.add(1);
+System.out.println(set.size());</code></pre>`,
+    options: [
+        "3",
+        "4",
+        "1",
+        "0"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "HashSet doesn't allow duplicates. Only unique elements 1,2,3 are stored. Size = 3."
+},
+
+// ========== CÂU 132 ==========
+{
+    id: 132,
+    question: "Which of the following exceptions might arise when using the File object to generate a new file?",
+    options: [
+        "IOException exception",
+        "FileNotFound exception",
+        "FileError Exception",
+        "IOAccessDenied exception"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "File creation operations can throw IOException for various I/O errors like disk full, access denied, etc."
+},
+
+// ========== CÂU 133 ==========
+{
+    id: 133,
+    question: "You are developing an e-commerce platform, and you need to display a list of products sorted by their prices in ascending order. Explain how you would use Java collections to achieve efficient sorting, and choose the most suitable sorting algorithm for this scenario.",
+    options: [
+        "Use Collections.sort() with a custom comparator.",
+        "Implement a custom quicksort algorithm for precise control.",
+        "Choose Arrays.sort() for simplicity and performance.",
+        "Utilize a PriorityQueue for automatic sorting during insertion.",
+        "Implement a custom bubble sort algorithm for educational purposes.",
+        "Use Comparator.reverseOrder() for descending order sorting."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.sort() with custom comparator for price field is most appropriate for sorting List of products."
+},
+
+// ========== CÂU 134 ==========
+{
+    id: 134,
+    question: "To use the ObjectOutputStream object for writing an object to a destination file, which interface should the target class implement?",
+    options: [
+        "Serializable",
+        "Interpretable",
+        "Variable",
+        "Comparable"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Serializable interface is a marker interface that indicates an object can be serialized (converted to byte stream)."
+},
+
+// ========== CÂU 135 ==========
+{
+    id: 135,
+    question: "You are developing a contact management system, and you need to quickly find a contact by their phone number. Explain how you would use Java collections to efficiently search for a contact based on a specific criterion.",
+    options: [
+        "Use a HashMap with phone numbers as keys for O(1) lookup.",
+        "Implement a linear search through the list of contacts.",
+        "Utilize Collections.binarySearch() with a sorted list.",
+        "Choose a HashSet for efficient phone number-based searching.",
+        "Implement a custom trie data structure for optimized searching.",
+        "Use Collections.max() with a custom comparator for finding the maximum value."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "HashMap provides O(1) average time complexity for lookups by key, making it ideal for phone number searches."
+},
+
+// ========== CÂU 136 ==========
+{
+    id: 136,
+    question: "Which of the following statements is used to add the content to an existing text file?",
+    options: [
+        "Set the append parameter to true in the constructor of the FileWriter object",
+        "Set the append parameter to true in the constructor of the File object",
+        "Set append parameter of true in the constructor of OutputStream object",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "FileWriter constructor with append=true opens file in append mode, writing to end without truncating."
+},
+
+// ========== CÂU 137 ==========
+{
+    id: 137,
+    question: "What is the term for creating objects from a class in OOP to manage a collection of vehicles?",
+    options: [
+        "Instantiation",
+        "Inheritance",
+        "Encapsulation",
+        "Abstraction",
+        "Composition",
+        "Polymorphism"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Instantiation is the process of creating objects (instances) from a class using 'new' keyword."
+},
+
+// ========== CÂU 138 ==========
+{
+    id: 138,
+    question: "The nextLine() method belongs to which of the following classes?",
+    options: [
+        "Scanner",
+        "Integer",
+        "String",
+        "System"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "nextLine() is a method of Scanner class that advances scanner past current line and returns skipped input."
+},
+
+// ========== CÂU 139 ==========
+{
+    id: 139,
+    question: "Which of the following is an example of encapsulation in Java?",
+    options: [
+        "Creating a private field and providing public getter and setter methods",
+        "Creating a public field and directly accessing it from other classes",
+        "Creating a protected field and accessing it from subclasses only",
+        "Creating a default (no modifier) field and accessing it from the same package"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Encapsulation means hiding data and providing controlled access through public methods (getters/setters)."
+},
+
+// ========== CÂU 140 ==========
+{
+    id: 140,
+    question: "Choose multiple correct answers about reference types and primitive types.",
+    options: [
+        "The value of a reference type variable is the address refer to an object.",
+        "The null constant refers to an empty or uninitialized reference variable.",
+        "Reference variables usually must be initialized with the new keyword",
+        "For Primitive types, memory location that stores data"
+    ],
+    correct: [0, 1, 3],
+    type: "multiple",
+    explanation: "A, B, D are correct. C is wrong because reference variables can also be assigned null or reference to existing object."
+},
+
+// ========== CÂU 141 ==========
+{
+    id: 141,
+    question: "What is the role of the Java Development Kit (JDK) in java programming? Choose multiple correct answers.",
+    options: [
+        "A cross-platformed software development environment that offers a collection of tools and libraries necessary for developing Java-based software applications.",
+        "A core package used in Java programming, along with the JVM (Java Virtual Machine) and the JRE (Java Runtime Environment) to develop and deploy applications",
+        "A software for building applications that combines common developer tools into a single graphical user interface (GUI).",
+        "A text editor that can assist in writing software code with features such as syntax highlighting with visual cues"
+    ],
+    correct: [0, 1],
+    type: "multiple",
+    explanation: "A and B correctly describe JDK. C describes IDE, D describes text editor."
+},
+
+// ========== CÂU 142 ==========
+{
+    id: 142,
+    question: "What is the purpose of the 'this' keyword in Java?",
+    options: [
+        "It refers to the current class",
+        "It refers to the current object",
+        "It refers to the superclass",
+        "It refers to the subclass",
+        "It initializes a variable",
+        "It denotes a static method"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "'this' refers to current object instance, used to access instance variables/methods and to call other constructors."
+},
+
+// ========== CÂU 143 ==========
+{
+    id: 143,
+    question: "Which access modifier is commonly used for setter methods in Java?",
+    options: [
+        "public",
+        "private",
+        "protected",
+        "static",
+        "final",
+        "abstract"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Setter methods are typically public to allow controlled access to private fields from outside the class."
+},
+
+// ========== CÂU 144 ==========
+{
+    id: 144,
+    question: "What is the purpose of the 'super' keyword in Java?",
+    options: [
+        "To call the constructor or methods of the parent class",
+        "To call the constructor or methods of the child class",
+        "To call the members of the same class",
+        "To define a static method"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "'super' is used to access superclass members, call superclass constructor, or invoke overridden methods."
+},
+
+// ========== CÂU 145 ==========
+{
+    id: 145,
+    question: `What is the output following the code snippet?
+<pre><code>public class DemoClass {
+    void add(int x, int y) {
+        System.out.println("1. Addition is: " + (x + y));
+    }
+    void add(int y, int x) {
+        System.out.println("2. Addition is: " + (x + y));
+    }
+    public static void main(String[] args) {
+        DemoClass obj = new DemoClass();
+        obj.add(20, 30);
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "2. Addition of two numbers: 50",
+        "1. Addition of two numbers: 50",
+        "20 , 30"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error - duplicate method add(int,int). Parameter names don't matter, only types matter for overloading."
+},
+
+// ========== CÂU 146 ==========
+{
+    id: 146,
+    question: "In Java, can an abstract class have instance variables?",
+    options: [
+        "Yes, abstract classes can have both instance and static variables.",
+        "No, abstract classes cannot have instance variables.",
+        "Yes, but only if the instance variables are declared as 'static'",
+        "Yes, but only if the abstract class has no methods."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Abstract classes can have all types of members: instance variables, static variables, abstract methods, concrete methods, constructors."
+},
+
+// ========== CÂU 147 ==========
+{
+    id: 147,
+    question: `What is the output of the following Java program?
+<pre><code>abstract class A {
+    private int a, b;
+    public void call(int a, int b) {
+        this.a = a;
+        this.b = b;
+        System.out.println(a + b);
+    }
+}
+public class Main {
+    public static void main(String args[]) {
+        A m = new A() {};
+        m.call(12, 25);
+    }
+}</code></pre>`,
+    options: [
+        "37",
+        "12",
+        "25",
+        "Compiler error at statement A m = new A() {};"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Anonymous class extends A and provides implementation for abstract methods (none in this case). call() method works normally."
+},
+
+// ========== CÂU 148 ==========
+{
+    id: 148,
+    question: "What is the default value of boolean elements in an array if NOT initialized?",
+    options: [
+        "false",
+        "0",
+        "null",
+        "true"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Default value for boolean in arrays is false. For objects: null, for numeric types: 0, for char: '\\u0000'."
+},
+
+// ========== CÂU 149 ==========
+{
+    id: 149,
+    question: `What is the output of the following code snippet?
+<pre><code>ArrayList<Integer> nums = new ArrayList();
+nums.add(0, 2);
+nums.add(1, 3);
+nums.add(2, 4);
+nums.add(3, 5);
+Iterator it = nums.iterator();
+while(it.hasNext()) {
+    System.out.print(it.next());
+}</code></pre>`,
+    options: [
+        "2345",
+        "0123",
+        "02132435",
+        "0325"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Elements are added at positions 0,1,2,3 with values 2,3,4,5. Iterator prints them in order: 2345."
+},
+
+// ========== CÂU 150 ==========
+{
+    id: 150,
+    question: "What classes are best suited for handling the reading and writing of character streams?",
+    options: [
+        "FileReader and FileWriter",
+        "FileInputStream and FileOutputStream",
+        "BufferedReader and FilePrinter",
+        "None of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "FileReader/FileWriter are designed for character streams (text files). FileInputStream/FileOutputStream are for byte streams."
+},// ========== CÂU 151 ==========
+{
+    id: 151,
+    question: "In the RandomAccessFile class, which mode supports metadata changes (file attributes) of the file immediately?",
+    options: [
+        "\"rws\"",
+        "\"rw\"",
+        "\"rwd\"",
+        "\"r\""
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "\"rws\" mode opens for reading and writing, and every update to the file's content or metadata is written synchronously to the underlying storage device."
+},
+
+// ========== CÂU 152 ==========
+{
+    id: 152,
+    question: "Which of the following statements about the Java language is true?",
+    options: [
+        "Java language is case-sensitive.",
+        "Java is not a fully object-oriented language.",
+        "Using a colon to end the command.",
+        "The Java code only runs on the Windows platform."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java is case-sensitive - keywords, identifiers, and method names must use consistent casing. Java uses semicolons to end statements, and it's platform-independent."
+},
+
+// ========== CÂU 153 ==========
+{
+    id: 153,
+    question: "Which of the following statements is correct to declare a class named Cat?",
+    options: [
+        "class Cat{ // something }",
+        "class public Cat(){ // something}",
+        "Class Cat{ // something}",
+        "public Cat class{ // something }"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The correct syntax is 'class ClassName'. Access modifiers like 'public' are optional and come before 'class'."
+},
+
+// ========== CÂU 154 ==========
+{
+    id: 154,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Person {
+    protected String id;
+    public Person(String id) {
+        id = id;
+    }
+    public static void main(String[] args) {
+        Person p = new Person("FPTU");
+        System.out.println(p.id);
+    }
+}</code></pre>`,
+    options: [
+        "null",
+        "FPTU",
+        "Runtime error",
+        "None of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "The assignment 'id = id' assigns parameter to itself, not to instance field. Should use 'this.id = id'. Instance field id remains null."
+},
+
+// ========== CÂU 155 ==========
+{
+    id: 155,
+    question: "Which of the following is the superclass of all classes in Java?",
+    options: [
+        "Object",
+        "Number",
+        "Class",
+        "System"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "java.lang.Object is the root class of the Java class hierarchy. Every class has Object as a superclass."
+},
+
+// ========== CÂU 156 ==========
+{
+    id: 156,
+    question: "Which method is called first when an object of a subclass is created in Java?",
+    options: [
+        "The constructor of the superclass",
+        "The constructor of the subclass",
+        "The toString method",
+        "The equals method"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "When creating a subclass object, the superclass constructor is called first (either explicitly via super() or implicitly via default constructor)."
+},
+
+// ========== CÂU 157 ==========
+{
+    id: 157,
+    question: `What is the output of the following Java program?
+<pre><code>class Test {
+    void m1(String x) {
+        System.out.println("Parent");
+    }
+}
+class TestChild extends Test {
+    public void m2(String x) {
+        System.out.println("Child");
+        super.m1(x);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Test obj = new TestChild();
+        if (obj instanceof TestChild) {
+            obj.m2("FE");
+        }
+    }
+}</code></pre>`,
+    options: [
+        "Compile error",
+        "Child Parent",
+        "Child Child",
+        "Parent Parent"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error because reference type Test doesn't have m2() method, even though the actual object is TestChild and the instanceof check passes."
+},
+
+// ========== CÂU 158 ==========
+{
+    id: 158,
+    question: `What is the output of the following Java program?
+<pre><code>interface IA {
+    void show();
+}
+interface IB {
+    void show();
+}
+class MyClass implements IA, IB {
+    @Override
+    public void show() {
+        System.out.println("@MyClass");
+    }
+}
+public class Main {
+    public static void main(String args[]) {
+        IA objA = new MyClass();
+        objA.show();
+    }
+}</code></pre>`,
+    options: [
+        "@MyClass",
+        "Runtime error in the statement: objA.show();",
+        "Compile error in the statement: IA objA = new MyClass();",
+        "None of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Multiple interface implementation is allowed. The single implementation satisfies both interfaces. Output is @MyClass."
+},
+
+// ========== CÂU 159 ==========
+{
+    id: 159,
+    question: "Can we add a duplicated element into a Set in Java?",
+    options: [
+        "No, if we add a duplicated element into a Set, the Set will keep the old element and remove the new one.",
+        "No, the procedure will raise an exception",
+        "Yes, we can add a duplicated element into a Set and the Set will keep the new element and remove the old one",
+        "Yes, we can add a duplicated element into a Set and the Set will maintain 2 elements including the old element and the duplicated one"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Sets do not allow duplicate elements. The add() method returns false when trying to add a duplicate, and the set remains unchanged."
+},
+
+// ========== CÂU 160 ==========
+{
+    id: 160,
+    question: "Which of the following statements related to removing an element in an ArrayList is true?",
+    options: [
+        "The remove method will return the deleted value for the user.",
+        "The remove operation will raise an exception if the element does not exist in the ArrayList",
+        "The remove method will return the integer value after removing.",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ArrayList remove(int index) returns the element that was removed. remove(Object) returns boolean indicating if element was found."
+},
+
+// ========== CÂU 161 ==========
+{
+    id: 161,
+    question: "Which of the following is an example of a checked exception in Java?",
+    options: [
+        "NullPointerException",
+        "ArrayIndexOutOfBoundsException",
+        "FileNotFoundException",
+        "ArithmeticException"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "FileNotFoundException is a checked exception that must be either caught or declared in the method signature."
+},
+
+// ========== CÂU 162 ==========
+{
+    id: 162,
+    question: "How are exceptions handled in Java?",
+    options: [
+        "By using try-catch blocks to catch and handle exceptions.",
+        "By using throw statements to throw exceptions.",
+        "By using the throws keyword to declare that a method may throw an exception",
+        "All of the mentioned."
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "All three mechanisms are used for exception handling: try-catch for handling, throw for throwing, throws for declaring exceptions."
+},
+
+// ========== CÂU 163 ==========
+{
+    id: 163,
+    question: "What does Java not support?",
+    options: [
+        "Multiple inheritances for classes",
+        "Inheritance",
+        "Multiple inheritances of interfaces",
+        "Compile-time polymorphism"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java supports single inheritance for classes but allows multiple inheritance for interfaces."
+},
+
+// ========== CÂU 164 ==========
+{
+    id: 164,
+    question: `What is the output of the following code snippet?
+<pre><code>public class Main {
+    static void m1(Integer i) {
+        System.out.println(1);
+    }
+    static void m1(Double d) {
+        System.out.println(2);
+    }
+    static void m1(Object o) {
+        System.out.println(3);
+    }
+    public static void main(String[] args) {
+        m1(12.5);
+    }
+}</code></pre>`,
+    options: [
+        "2",
+        "3",
+        "1",
+        "12.5"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "12.5 is a double literal, which matches most closely with Double parameter (autoboxing)."
+},
+
+// ========== CÂU 165 ==========
+{
+    id: 165,
+    question: "In Java, if a concrete subclass extends an abstract class, and the subclass provides implementations for all the abstract methods of the superclass, what is the status of the subclass?",
+    options: [
+        "The subclass is also abstract.",
+        "The subclass is now a concrete class.",
+        "The subclass cannot extend an abstract class.",
+        "The subclass must have at least one abstract method.",
+        "The subclass must override all methods of the superclass.",
+        "The subclass inherits the abstract status from the superclass."
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "When all abstract methods are implemented, the subclass becomes concrete and can be instantiated."
+},
+
+// ========== CÂU 166 ==========
+{
+    id: 166,
+    question: "Which of the following is/are advantages of packages?",
+    options: [
+        "Packages avoid name clashes",
+        "Classes, even though they are visible outside their package, can have fields visible to packages only",
+        "We can have hidden classes that are used by the packages, but not visible outside.",
+        "All of the mentioned"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "All three are advantages: name conflict resolution, access control through package visibility, and information hiding."
+},
+
+// ========== CÂU 167 ==========
+{
+    id: 167,
+    question: "In Java, can an abstract class have a constructor?",
+    options: [
+        "Yes, abstract classes can have both default and parameterized constructors.",
+        "No, abstract classes cannot have constructors.",
+        "Yes, but only if the constructor is private.",
+        "Yes, but only if the abstract class has no attributes."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Abstract classes can have constructors which are called when concrete subclasses are instantiated."
+},
+
+// ========== CÂU 168 ==========
+{
+    id: 168,
+    question: "Choose the correct statement about the anonymous class.",
+    options: [
+        "An anonymous class can be used to implement an interface",
+        "Anonymous class used to extend methods",
+        "Anonymous class is used to define a set of constants",
+        "All of the others"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Anonymous classes can implement interfaces or extend classes, providing immediate implementation without naming the class."
+},
+
+// ========== CÂU 169 ==========
+{
+    id: 169,
+    question: `What is the output of the following code snippet:
+<pre><code>String fName = "test.txt";
+FileInputStream fs = new FileInputStream(fName);
+byte[] list = new byte[100];
+fs.read(list, 0, 4);
+System.out.format("%c%n", list[1]);</code></pre>
+If test.txt has the content as follows:
+01234567890`,
+    options: [
+        "1",
+        "0",
+        "2",
+        "3"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "read() reads 4 bytes into array: list[0]='0', list[1]='1', list[2]='2', list[3]='3'. So list[1] is '1'."
+},
+
+// ========== CÂU 170 ==========
+{
+    id: 170,
+    question: `What is the output of the following program?
+<pre><code>import java.util.*;
+class Pen implements Comparable<Pen> {
+    String color; int price;
+    Pen(String color, int price) { this.color = color; this.price = price; }
+    public String toString() { return "(" + color + "," + price + ")"; }
+    public int compareTo(Pen x) {
+        int k = color.compareTo(x.color);
+        if (k != 0) return (-k);
+        return (x.price - price);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        List<Pen> t = new ArrayList<>();
+        t.add(new Pen("B", 3));
+        t.add(new Pen("C", 4));
+        t.add(new Pen("D", 7));
+        t.add(new Pen("C", 5));
+        t.add(new Pen("A", 6));
+        Collections.sort(t);
+        for (Pen x : t) System.out.print(x);
+        System.out.println();
+    }
+}</code></pre>`,
+    options: [
+        "(A,6) (B,3) (C,4) (C,5) (D,7)",
+        "(D,7) (C,5) (C,4) (B,3) (A,6)",
+        "(B,3) (C,5) (D,7) (C,4) (A,6)",
+        "(B,3) (C,4) (C,5) (A,6) (D,7)"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "compareTo sorts by color descending (negative of natural order), then by price descending. Result: D7, C5, C4, B3, A6."
+},
+
+// ========== CÂU 171 ==========
+{
+    id: 171,
+    question: "What is the return type of the instanceof operator?",
+    options: [
+        "A reference",
+        "A class",
+        "An int",
+        "A boolean"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "instanceof operator returns a boolean value - true if the object is an instance of the specified type, false otherwise."
+},
+
+// ========== CÂU 172 ==========
+{
+    id: 172,
+    question: `What will be the result when you attempt to compile and run the following code?
+<pre><code>public class Conv {
+    public static void main(String argv[]) {
+        Conv c = new Conv();
+        String s = new String("ello");
+        c.amethod(s);
+    }
+    public void amethod(String s) {
+        char c = 'H';
+        c += s;
+        System.out.println(c);
+    }
+}</code></pre>`,
+    options: [
+        "Compilation and output the string \"Hello\"",
+        "Compilation and output the string \"ello\"",
+        "Compilation and output the string elloH",
+        "Compile time error"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "Compile error: cannot concatenate char and String with += operator. Should use String concatenation or StringBuilder."
+},
+
+// ========== CÂU 173 ==========
+{
+    id: 173,
+    question: `Find the output of the below program?
+<pre><code>class Animal {
+    int id;
+    public Animal() {}
+    Animal(int id) {
+        this.id = id;
+    }
+}
+public class Test {
+    public static void main(String[] args) {
+        Animal a1 = new Animal(1001);
+        Animal a2 = new Animal(1001);
+        Animal a3 = new Animal();
+        System.out.print(a1.equals(a2) + " ");
+        System.out.println(a2.equals(a3));
+    }
+}</code></pre>`,
+    options: [
+        "true false",
+        "error",
+        "false false",
+        "Exception"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Default equals() compares references. a1, a2, a3 are different objects, so all comparisons return false."
+},
+
+// ========== CÂU 174 ==========
+{
+    id: 174,
+    question: `Given:
+<pre><code>1. public interface A {
+2.     String DEFAULT_GREETING = "Hello World";
+3.     public void method1();
+4. }</code></pre>
+A programmer wants to create an interface called B that has A as its parent. Which interface declaration is correct?`,
+    options: [
+        "public interface B extends A {}",
+        "public interface B implements A {}",
+        "public interface B instanceOf A {}",
+        "public interface B inheritsFrom A {}"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Interfaces use 'extends' keyword to inherit from other interfaces, not 'implements'."
+},
+
+// ========== CÂU 175 ==========
+{
+    id: 175,
+    question: "A variable declared with the default modifier can be accessed by _____. (Select 2)",
+    options: [
+        "different packages and different classes",
+        "same package different classes",
+        "same package sub classes",
+        "different packages and sub classes",
+        "all classes",
+        "the class containing that variable only"
+    ],
+    correct: [1, 2],
+    type: "multiple",
+    explanation: "Default (package-private) access allows access within the same package only - by any class in the package, including subclasses."
+},
+
+// ========== CÂU 176 ==========
+{
+    id: 176,
+    question: "For a class defined inside a method, what rule governs access to the variables of the enclosing method?",
+    options: [
+        "The class can access any variable",
+        "The class can only access static variables",
+        "The class can only access transient variables",
+        "The class can only access final variables"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "Local classes (defined in methods) can only access final or effectively final variables of the enclosing method."
+},
+
+// ========== CÂU 177 ==========
+{
+    id: 177,
+    question: "Select the correct statement:",
+    options: [
+        "An object reference can be cast to an interface reference when the object implements the referenced interface.",
+        "An object reference can always be cast to an interface reference.",
+        "An object reference can be cast to an interface reference when the object implements all methods of the referenced interface.",
+        "An object reference cannot be cast to an interface reference."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "An object can be cast to an interface type only if the object's class implements that interface."
+},
+
+// ========== CÂU 178 ==========
+{
+    id: 178,
+    question: `Given the following Java code:
+<pre><code>public class ElectricCooker implements Appliance {    //1
+    public void cook() {}
+}
+abstract class ElectricRiceCooker1 extends ElectricCooker { //3
+}
+abstract class ElectricRiceCooker2 extends ElectricCooker { //5
+    public void cook(double time) {}
+}
+class ElectricRiceCooker3 extends ElectricCooker implements Appliance { //7
+    public void ricecook() {}
+}
+interface Appliance {    //9
+    public void cook();
+}</code></pre>
+What is the result?`,
+    options: [
+        "Compilation succeeds",
+        "Compilation fails with an error on line 1",
+        "Compilation fails with an error on line 3",
+        "Compilation fails with an error on line 5",
+        "Compilation fails with an error on line 7",
+        "Compilation fails with an error on line 9"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "All code compiles successfully. Line 7 is redundant but valid (implements already implemented interface)."
+},
+
+// ========== CÂU 179 ==========
+{
+    id: 179,
+    question: `What is the output?
+<pre><code>public class Test {
+    public static void main(String[] args) {
+        Object ob1 = new Object();
+        Object ob2 = ob1;
+        if (ob1.equals(ob2)) System.out.println("ob1 equals ob2");
+        if (ob1 == ob2) System.out.println("ob1==ob2");
+        System.out.println("Have a nice day!");
+    }
+}</code></pre>`,
+    options: [
+        "ob1 equals ob2\nob1==ob2\nHave a nice day!",
+        "ob1 equals ob2\nHave a nice day!",
+        "ob1==ob2\nHave a nice day!",
+        "Have a nice day!"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "ob1 and ob2 reference the same object, so both equals() and == return true."
+},
+
+// ========== CÂU 180 ==========
+{
+    id: 180,
+    question: "Java source code will be compiled to......",
+    options: [
+        "Java bytecode.",
+        "Machine code.",
+        "Assembly code.",
+        "Operation system code."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Java compiler (javac) compiles .java source files into .class files containing Java bytecode, which is executed by JVM."
+},
+
+// ========== CÂU 181 ==========
+{
+    id: 181,
+    question: `What is the output when you try to compile and run the following program?
+<pre><code>import java.util.*;
+public class Main {
+    public static void main(String argv[]) {
+        String x = "ABC$PQUV";
+        int k = x.indexOf("$");
+        String y = x.substring(0, k);
+        String z = new String(new char[] {'A','B','C'});
+        System.out.print(y + " ");
+        System.out.println(y.equals(z));
+    }
+}</code></pre>`,
+    options: [
+        "ABC true",
+        "ABC false",
+        "ABCP true",
+        "ABCP false",
+        "AB true"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "y = substring before '$' = 'ABC', z = new String from char array = 'ABC', so y.equals(z) returns true."
+},
+
+// ========== CÂU 182 ==========
+{
+    id: 182,
+    question: `What happens when you try to compile and run the following program?
+<pre><code>import java.util.*;
+public class Main {
+    public static void main(String argv[]) {
+        TreeSet<Integer> t = new TreeSet<Integer>();
+        t.add(12);
+        t.add(2);
+        t.add(4);
+        t.add(2);
+        Iterator<Integer> i = t.iterator();
+        int sum = 0;
+        while (i.hasNext()) sum += i.next();
+        System.out.println(sum);
+    }
+}</code></pre>`,
+    options: [
+        "The program will print out: 18",
+        "The program will print out: 20",
+        "The program will print out: 16",
+        "The program has a compile error."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "TreeSet stores unique sorted elements: 2, 4, 12. Sum = 2 + 4 + 12 = 18."
+},
+
+// ========== CÂU 183 ==========
+{
+    id: 183,
+    question: "Select correct statements about access modifiers.",
+    options: [
+        "1, 3",
+        "1, 2", 
+        "1, 4",
+        "1, 2, 4",
+        "2, 3, 4"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "(1) Public members accessible everywhere - correct. (2) Default members only in same package - incorrect (says 'all classes'). (3) Protected members accessible in package - correct. (4) Private members only in same class - incorrect (says 'package')."
+},
+
+// ========== CÂU 184 ==========
+{
+    id: 184,
+    question: "All of the numeric wrapper classes in the java.lang package are subclasses of the abstract class .......",
+    options: [
+        "java.lang.Number",
+        "java.lang.Integer",
+        "java.lang.Object",
+        "java.lang.Wrapper"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Number is the abstract superclass of platform classes representing numeric values: Byte, Short, Integer, Long, Float, Double."
+},
+
+// ========== CÂU 185 ==========
+{
+    id: 185,
+    question: "Select the order of access modifiers from the least restrictive to the most restrictive in Java.",
+    options: [
+        "default, protected, private, public",
+        "public, protected, default, private",
+        "public, private, protected, default",
+        "default, public, protected, private",
+        "public, default, protected, private"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Order from least to most restrictive: public (any class) > protected (package + subclasses) > default (package only) > private (class only)."
+},
+
+// ========== CÂU 186 ==========
+{
+    id: 186,
+    question: `What is the result of running the program below?
+<pre><code>import java.util.*;
+import java.lang.*;
+class Vase {
+    String color;
+    int price;
+    Vase() { }
+    Vase(String color, int price) {
+        this.color = color;
+        this.price = price;
+    }
+    public String toString() {
+        return (color + "," + price);
+    }
+}
+class SpecVase extends Vase {
+    int type;
+    SpecVase() { }
+    SpecVase(String color, int price, int type) {
+        this.type = type;
+        super(color, price);
+    }
+    void display() {
+        String s = "(" + super.toString() + "," + type + "),";
+        System.out.println(s);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        SpecVase x = new SpecVase();
+        SpecVase y = new SpecVase("Hoa", 20, 10);
+        x.display();
+        y.display();
+        System.out.println();
+    }
+}</code></pre>`,
+    options: [
+        "Compilation fails (because of incorrects in constructor of sub-class).",
+        "(null,5,5)\n(Hoa,20,10)",
+        "(null,0,5)\n(Hoa,20,10)",
+        "(null,5,0)\n(Hoa,20,10)"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compilation fails because super() call must be first statement in constructor. Should be: super(color, price); this.type = type;"
+},
+
+// ========== CÂU 187 ==========
+{
+    id: 187,
+    question: `Given the following code. Which of the following statements can be legally inserted in place of the comment //Here? (select two)
+<pre><code>class Base {}
+public class MyCast extends Base {
+    static boolean b1 = false;
+    static int i = -1;
+    static double d = 10.1;
+    public static void main(String argv[]) {
+        MyCast m = new MyCast();
+        Base b = new Base();
+        //Here
+    }
+}</code></pre>`,
+    options: [
+        "b = m;",
+        "m = b;",
+        "d = i;",
+        "b1 = i;"
+    ],
+    correct: [0, 2],
+    type: "multiple",
+    explanation: "A: upcasting (subclass to superclass) is allowed. C: widening primitive conversion (int to double) is allowed. B: downcasting requires explicit cast. D: cannot assign int to boolean."
+},
+
+// ========== CÂU 188 ==========
+{
+    id: 188,
+    question: `What will be the output of the following Java program?
+<pre><code>final class A {
+    int i;
+}
+class B extends A {
+    int j;
+    System.out.println(j + " " + i);
+}
+class inheritance {
+    public static void main(String args[]) {
+        B obj = new B();
+        obj.display();
+    }
+}</code></pre>`,
+    options: [
+        "0 0",
+        "Display nothing (empty)",
+        "Compiler error",
+        "Runtime Error"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Compile error: cannot inherit from final class A. Also, method declaration in class B is incorrect."
+},
+
+// ========== CÂU 189 ==========
+{
+    id: 189,
+    question: `What will be the result when you try to compile and run the following code?
+<pre><code>private class Base {
+    Base() {
+        int i = 100;
+        System.out.println(i);
+    }
+}
+public class Pri extends Base {
+    static int i = 200;
+    public static void main(String argv[]) {
+        Pri p = new Pri();
+        System.out.println(i);
+    }
+}</code></pre>`,
+    options: [
+        "Error at compile time",
+        "200",
+        "100 followed by 200",
+        "100"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error: top-level class cannot be private. Only nested classes can be private."
+},
+
+// ========== CÂU 190 ==========
+{
+    id: 190,
+    question: "Which of the following is true about Wrapped classes?",
+    options: [
+        "Wrapped classes are classes that allow primitive types to be accessed as objects.",
+        "Wrapper classes are: Boolean, Character, Byte, Integer, Long, Float, and Double.",
+        "Wrapper classes are: Boolean, Char, Byte, Short, Integer, Long, Float, and Double."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "A is correct definition. B is incomplete (missing Short). C is incorrect (should be Character not Char)."
+},
+
+// ========== CÂU 191 ==========
+{
+    id: 191,
+    question: "______ class reads bytes from a file.",
+    options: [
+        "FileInputStream",
+        "FileInput",
+        "FileOutputStream",
+        "InputStream"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "FileInputStream is used for reading raw bytes from a file. InputStream is abstract superclass."
+},
+
+// ========== CÂU 192 ==========
+{
+    id: 192,
+    question: "An abstract class ......",
+    options: [
+        "can contain all concrete methods.",
+        "must contain at least one abstract method.",
+        "must contain all abstract method.",
+        "can not contain any data field."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Abstract classes can have both abstract and concrete methods, constructors, fields, etc."
+},
+
+// ========== CÂU 193 ==========
+{
+    id: 193,
+    question: `Given the following. What is the result?
+<pre><code>public class Example {
+    public static void main(String[] args) {
+        Person p1 = new Person("Hung", 20);
+        Person p2 = new Person("Ha", 22);
+        Person p3 = (new Example()).change(p2, "Nam");
+        System.out.println(p3.getCode() + " " + p3.name + " " + p3.age);
+    }
+    public Person change(Person p, String name) {
+        Person p1 = p;
+        p1.name = name;
+        return p1;
+    }
+}
+class Person {
+    private int code;
+    String name;
+    int age;
+    public Person(String name, int age) {
+        this.code++;
+        this.name = name;
+        this.age = age;
+    }
+    public int getCode() { return code; }
+}</code></pre>`,
+    options: [
+        "ClassCastException is thrown at runtime",
+        "Compilation fails",
+        "1 Nam 22",
+        "2 Nam 22"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "p1 and p reference same object. name changed to 'Nam'. code is instance variable, each object has its own, so p2.code = 1."
+},
+
+// ========== CÂU 194 ==========
+{
+    id: 194,
+    question: `Given the following. What is the result?
+<pre><code>public class Example {
+    public static void main(String[] args) {
+        String str = "FPT";
+        str.concat(" University!");
+        str.toLowerCase();
+        System.out.println(str.length());
+    }
+}</code></pre>`,
+    options: [
+        "0",
+        "3",
+        "14",
+        "13"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "String is immutable. concat() and toLowerCase() return new strings, original str remains \"FPT\" with length 3."
+},
+
+// ========== CÂU 195 ==========
+{
+    id: 195,
+    question: `What will be the content of result.dat file?
+<pre><code>import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+public class Main {
+    public static void main(String[] args) {
+        String file = "src/result.dat";
+        String[] num = {"An","an","An an"};
+        List<String> list = new ArrayList<>(Arrays.asList(num));
+        Collections.sort(list);
+        try {
+            PrintWriter out = new PrintWriter(file);
+            out.write(list.toString());
+            out.close();
+        } catch(FileNotFoundException e) {
+            System.out.println(e);
+        }
+    }
+}</code></pre>`,
+    options: [
+        "[An, An an, an]",
+        "[An an, an, An]",
+        "[an, An, An an]",
+        "empty file"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Collections.sort() uses natural ordering (case-sensitive): 'An' < 'An an' < 'an' (A < a in ASCII)."
+},
+
+// ========== CÂU 196 ==========
+{
+    id: 196,
+    question: `What will happen when you attempt to compile and run the following program:
+<pre><code>interface A {
+    void foo();
+    void fun();
+}
+class B implements A {
+    void foo() { System.out.print("B1"); }
+    void fun() { System.out.print("B2"); }
+}
+class Main {
+    public static void main(String[] args) {
+        A t = new B();
+        t.foo();
+        t.fun();
+    }
+}</code></pre>`,
+    options: [
+        "The program causes errors when it is compiled.",
+        "The output is B1B2",
+        "The program executes with no output.",
+        "The output is B2B1"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Compile error: interface methods are implicitly public, so implementation must be public. Class B methods have default (package) access."
+},
+
+// ========== CÂU 197 ==========
+{
+    id: 197,
+    question: "Which of these is correct way of calling a constructor having no parameters, of superclass Parent by subclass Child?",
+    options: [
+        "super(void);",
+        "superclass();",
+        "super.Parent();",
+        "super();"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "super() calls the no-argument constructor of the superclass. Must be first statement in subclass constructor."
+},
+
+// ========== CÂU 198 ==========
+{
+    id: 198,
+    question: "Which of the following may appear on the right-hand side of an instanceof operator? (select all correct options)",
+    options: [
+        "A reference",
+        "A class",
+        "An interface",
+        "A variable of primitive type",
+        "The name of a primitive type"
+    ],
+    correct: [1, 2],
+    type: "multiple",
+    explanation: "instanceof operator requires a reference type (class or interface) on the right-hand side, not primitive types or variables."
+},
+
+// ========== CÂU 199 ==========
+{
+    id: 199,
+    question: `Given the following:
+<pre><code>List<String> names = new ArrayList<String>();</code></pre>
+Which of the following statements are legal? (Select two)`,
+    options: [
+        "Iterator<String> iter = names.iterator();",
+        "for (String s : names)",
+        "while (String s : names)",
+        "int sizes = names.getSize();"
+    ],
+    correct: [0, 1],
+    type: "multiple",
+    explanation: "A: iterator() returns Iterator. B: enhanced for loop syntax. C: invalid while syntax. D: should be size() not getSize()."
+},
+
+// ========== CÂU 200 ==========
+{
+    id: 200,
+    question: `You are writing a set of classes related to cooking and have created your own exception hierarchy derived from java.lang.Exception as follows:
+<pre><code>Exception
+ +-- BadTasteException
+   +-- BitterException
+   +-- SourException</code></pre>
+BadTasteException is defined as an abstract class.
+You have a method eatMe that may throw a BitterException or a SourException. Which of the following method declarations will be acceptable to the compiler?`,
+    options: [
+        "public void eatMe(Ingredient[] list) throws BadTasteException",
+        "public void eatMe(Ingredient[] list) throws BitterException, SourException",
+        "public void eatMe(Ingredient[] list) may throw BadTasteException",
+        "public void eatMe(Ingredient[] list)"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Since BadTasteException is abstract, cannot throw it directly. Must declare the specific concrete exceptions BitterException and SourException."
+},// ========== CÂU 201 ==========
+{
+    id: 201,
+    question: `What is the output of the following code?
+<pre><code>class Rectangle {
+    int marks = 10;
+}
+public class Main {
+    public static void main(String... args) {
+        Rectangle s = new Rectangle();
+        switch (s.marks) {
+            default:
+                System.out.println("A");
+            case 10:
+                System.out.println("B");
+            case 100:
+                System.out.println("C");
+        }
+    }
+}</code></pre>`,
+    options: [
+        "A",
+        "C",
+        "B\nC",
+        "A\nB\nC"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "switch matches case 10, prints 'B', then falls through to next case (no break) and prints 'C'."
+},
+
+// ========== CÂU 202 ==========
+{
+    id: 202,
+    question: `What will be the output of the following code?
+<pre><code>public class integerEquals {
+    public static void main(String args[]) {
+        Integer a = new Integer(0);
+        Integer b = new Integer(0);
+        System.out.println(a == b);
+    }
+}</code></pre>`,
+    options: [
+        "The compiler will show an error at line 7",
+        "The program compiles and prints true",
+        "The program compiles and prints false",
+        "The program compiles but causes a runtime exception at line 7"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "== compares object references, not values. a and b are different Integer objects, so false."
+},
+
+// ========== CÂU 203 ==========
+{
+    id: 203,
+    question: `Given the following code, which of the results that follow would you expect?
+<pre><code>1. package mail;
+2.
+3. interface Box {
+4.     protected void open();
+5.     void close();
+6.     public void empty();
+7. }</code></pre>`,
+    options: [
+        "The code will not compile because of line 4.",
+        "The code will not compile because of line 5.",
+        "The code will not compile because of line 6.",
+        "The code will compile."
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Line 4: interface methods cannot be protected. They are implicitly public and abstract."
+},
+
+// ========== CÂU 204 ==========
+{
+    id: 204,
+    question: `Given the following. What is the result?
+<pre><code>public class Example {
+    public static void main(String[] args) {
+        Student S1 = new Student("SV01", "Lan", 5, 7);
+        System.out.println(S1);
+    }
+}
+abstract class Person {
+    String code, name;
+    public Person(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+    public abstract double getAverage();
+    @Override
+    public String toString() {
+        return code + "\\t" + name + "\\t" + getAverage();
+    }
+}
+class Student extends Person {
+    double mark1, mark2;
+    public Student(String code, String name, double mark1, double mark2) {
+        super(code, name);
+        this.mark1 = mark1;
+        this.mark2 = mark2;
+    }
+    public double getAverage() {
+        return (mark1 + mark2) / 2;
+    }
+}</code></pre>`,
+    options: [
+        "Compilation fails",
+        "Exception is thrown at runtime",
+        "SV01 Lan 6.0"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "The code compiles and runs. Average = (5+7)/2 = 6.0. toString() formats output with tabs."
+},
+
+// ========== CÂU 205 ==========
+{
+    id: 205,
+    question: "______ is the process of identifying and grouping attributes and actions related to a particular entity as relevant to the application at hand",
+    options: [
+        "Abstraction",
+        "Polymorphism",
+        "Inheritance",
+        "Encapsulation",
+        "Persistence",
+        "Construction"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "Abstraction involves identifying essential characteristics and behaviors while ignoring irrelevant details."
+},
+
+// ========== CÂU 206 ==========
+{
+    id: 206,
+    question: "What is the value of x after the following operation is performed? int x = 32 % 5;",
+    options: [
+        "32",
+        "6",
+        "6.4",
+        "2"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "32 divided by 5 is 6 with remainder 2. So 32 % 5 = 2."
+},
+
+// ========== CÂU 207 ==========
+{
+    id: 207,
+    question: `What is the output when the following program is run?
+<pre><code>public class Main {
+    public static void main(String args[]) {
+        Decrementer t = new Decrementer();
+        double x = 7.2;
+        System.out.print(x + " ");
+        t.decre(x);
+        System.out.print(x + " ");
+        t.decre(x);
+        System.out.println(x);
+    }
+}
+class Decrementer {
+    public void decre(double x) {
+        x = x - 2;
+    }
+}</code></pre>`,
+    options: [
+        "7.2 5.2 3.2",
+        "7.2 5.2 5.2",
+        "7.2 7.2 7.2",
+        "7.2 7.2 5.2",
+        "5.2 7.2 5.2"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Java is pass-by-value. The decre method modifies local copy of x, not the original variable."
+},
+
+// ========== CÂU 208 ==========
+{
+    id: 208,
+    question: "Select the list of primitives ordered in smallest to largest bit size representation",
+    options: [
+        "byte, int, float, char",
+        "char, short, long, float",
+        "char, int, float, long",
+        "None of the above"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "char: 16 bits, int: 32 bits, float: 32 bits, long: 64 bits. Note: char is 16 bits in Java (Unicode)."
+},
+
+// ========== CÂU 209 ==========
+{
+    id: 209,
+    question: `What is the output of this program?
+<pre><code>class Box {
+    int a;
+    int b;
+    int c;
+}
+class Mainclass {
+    public static void main(String args[]) {
+        Box x = new Box();
+        Box y;
+        x.a = 2;
+        x.b = 4;
+        x.c = 1;
+        y = x;
+        System.out.println(y.a);
+    }
+}</code></pre>`,
+    options: [
+        "2",
+        "4",
+        "Runtime error",
+        "Compile error"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "y references same object as x. y.a accesses the same field as x.a, which is 2."
+},
+
+// ========== CÂU 210 ==========
+{
+    id: 210,
+    question: `Assume that country is set for each class.
+Given:
+<pre><code>10. public class Money {
+11.     private String country, name;
+12.     public String getCountry() { return country; }
+13. }
+and:
+24. class Yen extends Money {
+25.     public String getCountry() { return super.country; }
+26. }
+28. class Euro extends Money {
+29.     public String getCountry(String timeZone) {
+30.         return super.getCountry();
+31.     }
+32. }</code></pre>
+Which is true?`,
+    options: [
+        "Yen returns correct country value.",
+        "Euro returns correct country value.",
+        "Compilation fails because of an error at line 30.",
+        "Yen and Euro both return correct country value.",
+        "Compilation fails because of an error at line 25."
+    ],
+    correct: 4,
+    type: "single",
+    explanation: "Line 25: cannot access private field 'country' from superclass, even with super keyword."
+},
+
+// ========== CÂU 211 ==========
+{
+    id: 211,
+    question: `Consider the following code. Which line will not compile?
+<pre><code>1. Object ob = new Object();
+2. String[] stringarr = new String[50];
+3. Float floater = new Float(3.14f);
+4. ob = stringarr;
+5. ob = stringarr[5];
+6. floater = ob;
+7. ob = floater;</code></pre>`,
+    options: [
+        "Line 4",
+        "Line 5",
+        "Line 6",
+        "Line 7"
+    ],
+    correct: 2,
+    type: "single",
+    explanation: "Line 6: cannot assign Object to Float without explicit cast. Should be: floater = (Float)ob;"
+},
+
+// ========== CÂU 212 ==========
+{
+    id: 212,
+    question: "Which of the following methods of the java.io.File can be used to check whether a file can be read or not?",
+    options: [
+        "canRead()",
+        "isRead()",
+        "read()",
+        "checkRead()"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "canRead() tests whether the application can read the file denoted by this abstract pathname."
+},
+
+// ========== CÂU 213 ==========
+{
+    id: 213,
+    question: `Select the correct combinations of assignments of a variable: (select 2)
+<pre><code>interface Printable {}
+class Shape {}
+class Triangle extends Shape implements Printable {}</code></pre>`,
+    options: [
+        "Printable var1 = new Printable();",
+        "Shape var2 = new Shape();",
+        "Triangle var3 = new Shape();",
+        "Printable var4 = new Shape();",
+        "Printable var5 = new Triangle();"
+    ],
+    correct: [1, 4],
+    type: "multiple",
+    explanation: "B: Shape var2 = new Shape() - valid. E: Printable var5 = new Triangle() - valid (Triangle implements Printable). Others: A - cannot instantiate interface, C - cannot assign superclass to subclass, D - Shape doesn't implement Printable."
+},
+
+// ========== CÂU 214 ==========
+{
+    id: 214,
+    question: "Suppose a class has public visibility. In this class we define a protected method. Which of the following statements is correct?",
+    options: [
+        "This method is only accessible from inside the class itself and from inside all subclasses.",
+        "In a class, you cannot declare methods with a lower visibility than the visibility of the class in which it is defined.",
+        "From within protected methods you do not have access to public methods.",
+        "This method is accessible from within the class itself and from within all classes defined in the same package as the class itself."
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "Protected methods are accessible within same package (by any class) and by subclasses in different packages."
+},
+
+// ========== CÂU 215 ==========
+{
+    id: 215,
+    question: "Which of the following modifier does not allow a variable to be modified its value once it was initialized?",
+    options: [
+        "final",
+        "static",
+        "private",
+        "transient"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "final variables cannot be reassigned after initialization. They are constants."
+},
+
+// ========== CÂU 216 ==========
+{
+    id: 216,
+    question: "Which of the following most closely describes the process of overriding?",
+    options: [
+        "A class with the same name replaces the functionality of a class defined earlier in the hierarchy",
+        "A method with the same name completely replaces the functionality of a method earlier in the hierarchy",
+        "A method with the same name but different parameters gives multiple uses for the same method name",
+        "A class is prevented from accessing methods in its immediate ancestor"
+    ],
+    correct: 1,
+    type: "single",
+    explanation: "Method overriding provides a new implementation in subclass for method already defined in superclass."
+},
+
+// ========== CÂU 217 ==========
+{
+    id: 217,
+    question: "What is the range of values that can be assigned to a variable of type short?",
+    options: [
+        "Depends on the underlying hardware",
+        "0 through 2^16 – 1",
+        "0 through 2^32 – 1",
+        "–2^15 through 2^15 – 1",
+        "–2^31 through 2^31 – 1"
+    ],
+    correct: 3,
+    type: "single",
+    explanation: "short is 16-bit signed integer: -32,768 to 32,767 (-2^15 to 2^15 - 1)."
+},
+
+// ========== CÂU 218 ==========
+{
+    id: 218,
+    question: `What is the output of the following program?
+<pre><code>class Van {
+    String driver; int rate;
+    Van() { driver = "unknown"; rate = 5; }
+    Van(String driver, int rate) {
+        this.driver = driver; this.rate = rate;
+    }
+    public String toString() { return (driver + "," + rate); }
+}
+class SpecVan extends Van {
+    int type;
+    SpecVan() {}
+    SpecVan(String driver, int rate, int type) {
+        super(driver, rate);
+        this.type = type;
+    }
+    void display() {
+        String s = "(" + super.toString() + "," + type + ")";
+        System.out.println(s);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        SpecVan x = new SpecVan();
+        SpecVan y = new SpecVan("Hoa", 20, 10);
+        x.display(); y.display();
+        System.out.println();
+    }
+}</code></pre>`,
+    options: [
+        "(unknown,5,0)\n(Hoa,20,10)",
+        "(null,0,0)\n(Hoa,20,10)",
+        "(null,0,5)\n(Hoa,20,10)",
+        "(null,5,5)\n(Hoa,20,10)"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "x uses default constructor: driver='unknown', rate=5, type=0 (default for int). y: driver='Hoa', rate=20, type=10."
+},
+
+// ========== CÂU 219 ==========
+{
+    id: 219,
+    question: `What is the output of the following code?
+<pre><code>class Person {
+    protected int age;
+    protected void setAge(int val) {
+        age = val;
+    }
+    protected int getAge() {
+        return age;
+    }
+}
+class Professor extends Person {
+    Professor(String val) {
+        specialization = val;
+    }
+    String specialization;
+    String getSpecialization() {
+        return specialization;
+    }
+}
+public class Main {
+    public static void main(String args[]) {
+        Professor p1 = new Professor("Binh");
+        Professor p2 = new Professor("Huong");
+        p1.setAge(40);
+        System.out.println(p2.getSpecialization() + ":" + p1.age);
+        System.out.println(p1.getSpecialization() + ":" + p2.age);
+    }
+}</code></pre>`,
+    options: [
+        "Huong:40\nBinh:0",
+        "Huong:0\nBinh:40",
+        "Binh:40\nHuong:0",
+        "Binh:0\nHuong:40"
+    ],
+    correct: 0,
+    type: "single",
+    explanation: "p2 specialization = 'Huong', p1 age = 40; p1 specialization = 'Binh', p2 age = 0 (default)."
+}
+];
+
+        let userAnswers = {};
+        let showingAnswers = false;
+        let answeredQuestions = new Set(); // Add tracking
+
+        function initQuiz() {
+            // Tự động cập nhật tổng số câu hỏi
+            document.getElementById('totalQuestions').textContent = questions.length;
+            
+            renderAllQuestions();
+            updateScoreSummary();
+        }
+
+        function renderAllQuestions() {
+            const quizContent = document.getElementById('quizContent');
+            
+            quizContent.innerHTML = questions.map(question => `
+                <div class="question-item" id="question-${question.id}">
+                    <div class="question-header">
+                        <div class="question-number">Câu ${question.id}</div>
+                        <div class="question-status" id="status-${question.id}">❓</div>
+                    </div>
+                    
+                    <div class="question-text">${question.question}</div>
+                    
+                    <div class="options-container">
+                        ${question.options.map((option, index) => `
+                            <div class="option-item" onclick="selectOption(${question.id}, ${index})">
+                                ${question.type === 'multiple' ? 
+                                    `<input type="checkbox" class="option-checkbox" id="q${question.id}-opt${index}" onchange="selectOption(${question.id}, ${index})">` :
+                                    `<input type="radio" name="q${question.id}" class="option-radio" id="q${question.id}-opt${index}" onchange="selectOption(${question.id}, ${index})">`
+                                }
+                                <label class="option-text" for="q${question.id}-opt${index}">
+                                    ${String.fromCharCode(65 + index)}. ${option}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="explanation" id="explanation-${question.id}">
+                        <h4><span class="icon">💡</span>Giải thích:</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectOption(questionId, optionIndex) {
+            // Prevent changes if question already answered
+            if (answeredQuestions.has(questionId)) {
+                return;
+            }
+            
+            const question = questions.find(q => q.id === questionId);
+            const questionElement = document.getElementById(`question-${questionId}`);
+            const optionElement = document.getElementById(`q${questionId}-opt${optionIndex}`);
+            
+            if (showingAnswers) return;
+            
+            if (question.type === 'multiple') {
+                // Handle multiple choice
+                if (!userAnswers[questionId]) {
+                    userAnswers[questionId] = [];
+                }
+                
+                if (optionElement.checked) {
+                    if (!userAnswers[questionId].includes(optionIndex)) {
+                        userAnswers[questionId].push(optionIndex);
+                    }
+                } else {
+                    userAnswers[questionId] = userAnswers[questionId].filter(idx => idx !== optionIndex);
+                }
+                
+                // Check if user has selected the correct number of answers for multiple choice
+                const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                if (userAnswers[questionId] && userAnswers[questionId].length === correctAnswers.length) {
+                    answeredQuestions.add(questionId);
+                    disableQuestionOptions(questionId);
+                    showQuestionFeedback(questionId);
+                } else {
+                    hideQuestionFeedback(questionId);
+                }
+            } else {
+                // Handle single choice - lock immediately
+                userAnswers[questionId] = optionIndex;
+                answeredQuestions.add(questionId);
+                disableQuestionOptions(questionId);
+                showQuestionFeedback(questionId);
+            }
+            
+            updateQuestionStatus(questionId);
+            updateScoreSummary();
+        }
+
+        function disableQuestionOptions(questionId) {
+            const optionElements = document.querySelectorAll(`[id^="q${questionId}-opt"]`);
+            optionElements.forEach(element => {
+                element.disabled = true;
+                element.parentElement.style.pointerEvents = 'none';
+                element.parentElement.style.opacity = '0.7';
+            });
+        }
+
+        function showQuestionFeedback(questionId) {
+            const question = questions.find(q => q.id === questionId);
+            const explanationElement = document.getElementById(`explanation-${questionId}`);
+            const isCorrect = checkAnswer(questionId);
+            
+            // Show explanation
+            explanationElement.classList.add('show');
+            
+            // Update option styling to show correct/incorrect
+            const optionElements = document.querySelectorAll(`[id^="q${questionId}-opt"]`);
+            optionElements.forEach((element, index) => {
+                const optionContainer = element.parentElement;
+                optionContainer.classList.remove('correct', 'incorrect', 'user-selected', 'user-incorrect');
+                
+                // Remove existing indicators
+                const existingIndicator = optionContainer.querySelector('.answer-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+                
+                const userAnswer = userAnswers[questionId];
+                const isUserSelection = question.type === 'multiple' ? 
+                    (userAnswer && userAnswer.includes(index)) : 
+                    (userAnswer === index);
+                
+                if (question.type === 'multiple') {
+                    const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                    
+                    if (correctAnswers.includes(index)) {
+                        // This is a correct answer
+                        optionContainer.classList.add('correct');
+                        const indicator = document.createElement('span');
+                        indicator.className = 'answer-indicator correct-indicator';
+                        indicator.textContent = isUserSelection ? '✓ Đúng' : '✓ Đáp án đúng';
+                        optionContainer.appendChild(indicator);
+                    } else if (isUserSelection) {
+                        // User selected wrong answer
+                        optionContainer.classList.add('user-incorrect');
+                        const indicator = document.createElement('span');
+                        indicator.className = 'answer-indicator incorrect-indicator';
+                        indicator.textContent = '✗ Sai';
+                        optionContainer.appendChild(indicator);
+                    }
+                } else {
+                    if (index === question.correct) {
+                        // This is the correct answer
+                        optionContainer.classList.add('correct');
+                        const indicator = document.createElement('span');
+                        indicator.className = 'answer-indicator correct-indicator';
+                        indicator.textContent = isUserSelection ? '✓ Đúng' : '✓ Đáp án đúng';
+                        optionContainer.appendChild(indicator);
+                    } else if (isUserSelection) {
+                        // User selected wrong answer
+                        optionContainer.classList.add('user-incorrect');
+                        const indicator = document.createElement('span');
+                        indicator.className = 'answer-indicator incorrect-indicator';
+                        indicator.textContent = '✗ Sai';
+                        optionContainer.appendChild(indicator);
+                    }
+                }
+            });
+        }
+
+        function hideQuestionFeedback(questionId) {
+            const explanationElement = document.getElementById(`explanation-${questionId}`);
+            explanationElement.classList.remove('show');
+            
+            // Remove feedback styling from options
+            const optionElements = document.querySelectorAll(`[id^="q${questionId}-opt"]`);
+            optionElements.forEach((element, index) => {
+                const optionContainer = element.parentElement;
+                optionContainer.classList.remove('correct', 'incorrect', 'user-selected', 'user-incorrect');
+                
+                // Remove existing indicators
+                const existingIndicator = optionContainer.querySelector('.answer-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+            });
+        }
+
+        function updateQuestionStatus(questionId) {
+            const question = questions.find(q => q.id === questionId);
+            const statusElement = document.getElementById(`status-${questionId}`);
+            const questionElement = document.getElementById(`question-${questionId}`);
+            
+            // Check if question is properly answered
+            let isAnswered = false;
+            if (question.type === 'multiple') {
+                const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                isAnswered = userAnswers[questionId] && userAnswers[questionId].length === correctAnswers.length;
+            } else {
+                isAnswered = userAnswers[questionId] !== undefined;
+            }
+            
+            if (isAnswered) {
+                if (showingAnswers || hasQuestionFeedback(questionId)) {
+                    const isCorrect = checkAnswer(questionId);
+                    statusElement.textContent = isCorrect ? '✅' : '❌';
+                    questionElement.className = `question-item ${isCorrect ? 'answered' : 'incorrect'}`;
+                } else {
+                    statusElement.textContent = '✏️';
+                    questionElement.className = 'question-item answered';
+                }
+            } else {
+                statusElement.textContent = '❓';
+                questionElement.className = 'question-item';
+            }
+        }
+
+        function hasQuestionFeedback(questionId) {
+            const explanationElement = document.getElementById(`explanation-${questionId}`);
+            return explanationElement.classList.contains('show');
+        }
+
+        function checkAnswer(questionId) {
+            const question = questions.find(q => q.id === questionId);
+            const userAnswer = userAnswers[questionId];
+            
+            if (question.type === 'multiple') {
+                if (!userAnswer || userAnswer.length === 0) return false;
+                const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                return userAnswer.length === correctAnswers.length && 
+                       userAnswer.every(ans => correctAnswers.includes(ans));
+            } else {
+                return userAnswer === question.correct;
+            }
+        }
+
+        function updateScoreSummary() {
+            const answeredCount = Object.keys(userAnswers).filter(qId => {
+                const question = questions.find(q => q.id == qId);
+                const answer = userAnswers[qId];
+                return answer !== undefined && 
+                       (question.type === 'single' || (question.type === 'multiple' && answer.length > 0));
+            }).length;
+            
+            const correctCount = Object.keys(userAnswers).filter(qId => checkAnswer(parseInt(qId))).length;
+            const percentage = answeredCount > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+            
+            document.getElementById('answeredCount').textContent = answeredCount;
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('scorePercentage').textContent = percentage + '%';
+        }
+
+        function showAllAnswers() {
+            showingAnswers = true;
+            
+            questions.forEach(question => {
+                const explanationElement = document.getElementById(`explanation-${question.id}`);
+                explanationElement.classList.add('show');
+                
+                // Highlight correct answers only
+                const optionElements = document.querySelectorAll(`[id^="q${question.id}-opt"]`);
+                optionElements.forEach((element, index) => {
+                    const optionContainer = element.parentElement;
+                    optionContainer.classList.remove('correct', 'incorrect', 'selected', 'user-selected', 'user-incorrect');
+                    
+                    // Remove existing indicators
+                    const existingIndicator = optionContainer.querySelector('.answer-indicator');
+                    if (existingIndicator) {
+                        existingIndicator.remove();
+                    }
+                    
+                    if (question.type === 'multiple') {
+                        const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                        if (correctAnswers.includes(index)) {
+                            optionContainer.classList.add('correct');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator correct-indicator';
+                            indicator.textContent = '✓ Đúng';
+                            optionContainer.appendChild(indicator);
+                        }
+                    } else {
+                        if (index === question.correct) {
+                            optionContainer.classList.add('correct');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator correct-indicator';
+                            indicator.textContent = '✓ Đáp án đúng';
+                            optionContainer.appendChild(indicator);
+                        }
+                    }
+                    
+                    // Disable further interactions
+                    element.disabled = true;
+                });
+                
+                updateQuestionStatus(question.id);
+            });
+            
+            updateScoreSummary();
+        }
+
+        function checkAllAnswers() {
+            showingAnswers = true;
+            
+            questions.forEach(question => {
+                const explanationElement = document.getElementById(`explanation-${question.id}`);
+                explanationElement.classList.add('show');
+                
+                // Show user answers vs correct answers
+                const optionElements = document.querySelectorAll(`[id^="q${question.id}-opt"]`);
+                optionElements.forEach((element, index) => {
+                    const optionContainer = element.parentElement;
+                    optionContainer.classList.remove('correct', 'incorrect', 'selected', 'user-selected', 'user-incorrect');
+                    
+                    // Remove existing indicators
+                    const existingIndicator = optionContainer.querySelector('.answer-indicator');
+                    if (existingIndicator) {
+                        existingIndicator.remove();
+                    }
+                    
+                    const userAnswer = userAnswers[question.id];
+                    const isUserSelection = question.type === 'multiple' ? 
+                        (userAnswer && userAnswer.includes(index)) : 
+                        (userAnswer === index);
+                    
+                    if (question.type === 'multiple') {
+                        const correctAnswers = Array.isArray(question.correct) ? question.correct : [question.correct];
+                        
+                        if (correctAnswers.includes(index)) {
+                            // This is a correct answer
+                            optionContainer.classList.add('correct');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator correct-indicator';
+                            indicator.textContent = isUserSelection ? '✓ Đúng - Bạn đã chọn' : '✓ Đáp án đúng';
+                            optionContainer.appendChild(indicator);
+                        } else if (isUserSelection) {
+                            // User selected wrong answer
+                            optionContainer.classList.add('user-incorrect');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator incorrect-indicator';
+                            indicator.textContent = '✗ Sai - Bạn đã chọn';
+                            optionContainer.appendChild(indicator);
+                        }
+                    } else {
+                        if (index === question.correct) {
+                            // This is the correct answer
+                            optionContainer.classList.add('correct');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator correct-indicator';
+                            indicator.textContent = isUserSelection ? '✓ Đúng - Bạn đã chọn' : '✓ Đáp án đúng';
+                            optionContainer.appendChild(indicator);
+                        } else if (isUserSelection) {
+                            // User selected wrong answer
+                            optionContainer.classList.add('user-incorrect');
+                            const indicator = document.createElement('span');
+                            indicator.className = 'answer-indicator incorrect-indicator';
+                            indicator.textContent = '✗ Sai - Bạn đã chọn';
+                            optionContainer.appendChild(indicator);
+                        }
+                    }
+                    
+                    // Disable further interactions
+                    element.disabled = true;
+                });
+                
+                updateQuestionStatus(question.id);
+            });
+            
+            updateScoreSummary();
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            showingAnswers = false;
+            answeredQuestions.clear();
+            
+            // Reset all form elements
+            document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+                input.disabled = false;
+                input.parentElement.style.pointerEvents = 'auto';
+                input.parentElement.style.opacity = '1';
+            });
+            
+            // Hide all explanations and feedback
+            questions.forEach(question => {
+                hideQuestionFeedback(question.id);
+            });
+            
+            // Reset all option styling and remove indicators
+            document.querySelectorAll('.option-item').forEach(option => {
+                option.classList.remove('correct', 'incorrect', 'selected', 'user-selected', 'user-incorrect');
+                const indicator = option.querySelector('.answer-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            });
+            
+            // Update all question statuses
+            questions.forEach(question => {
+                updateQuestionStatus(question.id);
+            });
+            
+            updateScoreSummary();
+        }
+
+        // Initialize quiz when page loads
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
